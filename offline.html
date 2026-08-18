@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NMBA Pledge Tracker — Dindigul Region</title>
+<style>
+:root{
+  --saffron:#FF9933; --green:#138808; --navy:#000080;
+  --bg:#f4f6f9; --card:#fff; --ink:#1a1d23; --muted:#5c6470; --line:#e2e6ec;
+  --ok:#138808; --warn:#c47f00; --bad:#c0392b;
+}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:linear-gradient(90deg,var(--saffron),#fff 45%,#fff 55%,var(--green));border-bottom:3px solid var(--navy);padding:14px 20px}
+.hwrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.chakra{width:44px;height:44px;border-radius:50%;border:3px solid var(--navy);position:relative;flex:none;background:#fff}
+.chakra::after{content:"";position:absolute;inset:6px;border-radius:50%;border:1px dashed var(--navy)}
+h1{font-size:19px;margin:0;color:var(--navy)}
+.sub{font-size:12.5px;color:#333;margin-top:2px}
+.helpline{margin-left:auto;background:var(--navy);color:#fff;padding:7px 13px;border-radius:8px;font-weight:700;font-size:13px;text-align:center}
+.helpline small{display:block;font-weight:400;opacity:.8;font-size:10.5px}
+nav{background:var(--navy);display:flex;gap:2px;padding:0 20px;overflow-x:auto}
+nav button{background:none;border:0;color:#cfd6ff;padding:11px 16px;cursor:pointer;font-size:14px;border-bottom:3px solid transparent;white-space:nowrap}
+nav button.on{color:#fff;border-bottom-color:var(--saffron);font-weight:600}
+main{padding:20px;max-width:1250px;margin:0 auto}
+.view{display:none}.view.on{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:10px;padding:14px}
+.card .n{font-size:27px;font-weight:700;color:var(--navy);line-height:1.1}
+.card .l{font-size:12px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
+.card.s2{border-left-color:var(--saffron)}.card.s3{border-left-color:var(--green)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:20px}
+.panel h2{margin:0 0 14px;font-size:16px;color:var(--navy);border-bottom:2px solid var(--line);padding-bottom:8px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line)}
+th{background:#eef1f6;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr:hover{background:#fafbfd}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid #c8cfd9;border-radius:7px;font:inherit;background:#fff}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--saffron);outline-offset:-1px;border-color:var(--saffron)}
+button.act{background:var(--navy);color:#fff;border:0;padding:10px 18px;border-radius:7px;cursor:pointer;font-weight:600;font-size:14px}
+button.act:hover{background:#00005c}
+button.gh{background:var(--green)}button.gh:hover{background:#0d6606}
+button.sec{background:#fff;color:var(--navy);border:1.5px solid var(--navy)}button.sec:hover{background:#eef1f6}
+button.dl{background:none;border:0;color:var(--bad);cursor:pointer;font-size:12px;padding:2px 6px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.p-ok{background:#e3f5e0;color:var(--ok)}.p-no{background:#fdecea;color:var(--bad)}.p-part{background:#fdf4e0;color:var(--warn)}
+.geo{font-size:11.5px;color:var(--muted);font-family:Consolas,monospace}
+.thumb{width:58px;height:44px;object-fit:cover;border-radius:5px;border:1px solid var(--line);cursor:pointer;display:block}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.bar{height:9px;background:#e6eaf0;border-radius:5px;overflow:hidden;min-width:70px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--saffron),var(--green))}
+a{color:var(--navy)}
+.rep{background:#fff;padding:22px;border:1px solid var(--line);border-radius:10px}
+.rep h3{text-align:center;margin:0 0 4px;color:var(--navy)}
+.rep .cen{text-align:center;font-size:13px;color:var(--muted);margin-bottom:16px}
+.rep table{border:1px solid #999}.rep th,.rep td{border:1px solid #999}
+.photostrip{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.photostrip figure{margin:0;width:150px;font-size:10.5px}
+.photostrip img{width:100%;height:105px;object-fit:cover;border:1px solid #999;border-radius:4px;cursor:pointer}
+.empty{text-align:center;padding:34px;color:var(--muted);font-size:14px}
+@media print{nav,.helpline,.noprint{display:none!important}body{background:#fff}}
+</style>
+</head>
+<body>
+<header><div class="hwrap">
+  <div class="chakra"></div>
+  <div>
+    <h1>Nasha Mukt Bharat Abhiyaan — National Pledge Tracker</h1>
+    <div class="sub">National Pledge Against Drug Abuse &middot; 18<sup>th</sup> August 2026 &middot; <b>Dindigul Region</b> — Branches, Offices, Units &amp; Institutions</div>
+  </div>
+  <div class="helpline">14446<small>NMBA Helpline</small></div>
+</div></header>
+
+<nav>
+  <button class="on" data-v="dash">Dashboard</button>
+  <button data-v="entry">Data Entry</button>
+  <button data-v="branches">Branches / Institutions</button>
+  <button data-v="report">DoSJE Report</button>
+  <button data-v="res">Resources</button>
+</nav>
+
+<main>
+
+<section class="view on" id="v-dash">
+  <div class="cards">
+    <div class="card"><div class="n" id="k1">0</div><div class="l">Total Pledges</div></div>
+    <div class="card s2"><div class="n" id="k2">0</div><div class="l">Women</div></div>
+    <div class="card s3"><div class="n" id="k3">0</div><div class="l">Youth</div></div>
+    <div class="card"><div class="n" id="k4">0</div><div class="l">e-Certificates</div></div>
+    <div class="card s2"><div class="n" id="k5">0</div><div class="l">Geo-tagged Photos</div></div>
+    <div class="card s3"><div class="n" id="k6">0 / 0</div><div class="l">Units Reported</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Reporting Status by Unit <span class="hint" style="float:right;font-weight:400">Deadline: 12:00 PM, 18.08.2026</span></h2>
+    <table><thead><tr>
+      <th>Unit / Institution</th><th>Type</th><th>Block</th><th class="num">Target</th>
+      <th class="num">Pledges</th><th style="width:130px">Achievement</th><th>Photo</th><th>Status</th>
+    </tr></thead><tbody id="statusBody"></tbody></table>
+  </div>
+
+  <div class="panel">
+    <h2>Category Breakdown</h2>
+    <table><thead><tr><th>Category</th><th class="num">Pledges</th><th class="num">Women</th><th class="num">Youth</th><th class="num">e-Certs</th></tr></thead>
+    <tbody id="catBody"></tbody></table>
+  </div>
+</section>
+
+<section class="view" id="v-entry">
+  <div class="panel">
+    <h2>Record Pledge Data</h2>
+    <form id="entryForm">
+      <div class="grid">
+        <div><label>Branch / Institution *</label><select id="f_unit" required></select></div>
+        <div><label>Camp Name / No.</label><input id="f_camp" placeholder="e.g. Camp 1 — Morning Assembly"></div>
+        <div><label>Venue</label><input id="f_venue" placeholder="e.g. School Auditorium"></div>
+        <div><label>Date of Camp</label><input type="date" id="f_date" value="2026-08-18"></div>
+        <div><label>Conducted By (Officer)</label><input id="f_by" placeholder="Name &amp; designation"></div>
+      </div>
+      <div class="grid" style="margin-top:12px">
+        <div><label>Total Persons Took Pledge *</label><input type="number" id="f_total" min="0" required></div>
+        <div><label>Women</label><input type="number" id="f_women" min="0" value="0"></div>
+        <div><label>Youth (15&ndash;29 yrs)</label><input type="number" id="f_youth" min="0" value="0"></div>
+        <div><label>e-Certificates Generated</label><input type="number" id="f_cert" min="0" value="0"></div>
+      </div>
+      <div class="grid" style="margin-top:12px">
+        <div><label>Geo-tagged Photo</label><input type="file" id="f_photo" accept="image/*"></div>
+        <div><label>Latitude</label><input id="f_lat" placeholder="10.3673"></div>
+        <div><label>Longitude</label><input id="f_lng" placeholder="77.9803"></div>
+        <div style="display:flex;align-items:flex-end"><button type="button" class="act sec" id="geoBtn" style="width:100%">Capture Location</button></div>
+      </div>
+      <div style="margin-top:12px"><label>Remarks</label><textarea id="f_rem" rows="2" placeholder="Venue, activity details, stakeholders involved"></textarea></div>
+      <div class="row" style="margin-top:14px">
+        <button type="submit" class="act gh">Save Entry</button>
+        <button type="reset" class="act sec">Clear</button>
+        <span class="hint" id="saveMsg"></span>
+      </div>
+    </form>
+    <p class="hint">The photo is stored with its location stamp and appears in the DoSJE report. Data lives in this browser (localStorage) — use <b>JSON Backup</b> in the Report tab to back up, or to merge submissions collected on other machines.</p>
+  </div>
+
+  <div class="panel">
+    <h2>Entries (<span id="entCount">0</span>)</h2>
+    <table><thead><tr><th>Photo</th><th>Unit</th><th>Date</th><th class="num">Total</th><th class="num">Women</th><th class="num">Youth</th><th class="num">Certs</th><th>Location</th><th class="noprint"></th></tr></thead>
+    <tbody id="entBody"></tbody></table>
+  </div>
+</section>
+
+<section class="view" id="v-branches">
+  <div class="panel">
+    <h2>Add Branch / Office / Unit / Institution</h2>
+    <form id="unitForm"><div class="grid">
+      <div><label>Name *</label><input id="u_name" required placeholder="e.g. Govt. Hr. Sec. School, Nilakottai"></div>
+      <div><label>Type *</label><select id="u_type">
+        <option>Regional Office</option><option>Branch</option><option>Unit</option>
+        <option>School</option><option>College / ITI</option><option>Hospital / PHC</option>
+        <option>De-addiction Centre</option><option>NGO / SHG</option><option>Panchayat / Village</option><option>Other</option>
+      </select></div>
+      <div><label>Block / Taluk (Dindigul)</label><select id="u_block">
+        <option>Dindigul</option><option>Athoor</option><option>Batlagundu</option><option>Guziliamparai</option>
+        <option>Kodaikanal</option><option>Natham</option><option>Nilakottai</option><option>Oddanchatram</option>
+        <option>Palani</option><option>Reddiarchatram</option><option>Sanarpatti</option><option>Shanarpatti</option>
+        <option>Thoppampatti</option><option>Vadamadurai</option><option>Vedasandur</option>
+      </select></div>
+      <div><label>Nodal Person</label><input id="u_person"></div>
+      <div><label>Contact</label><input id="u_phone"></div>
+      <div><label>Pledge Target</label><input type="number" id="u_target" min="0" value="100"></div>
+    </div>
+    <div class="row" style="margin-top:14px"><button class="act gh">Add Unit</button>
+    <button type="button" class="act sec" id="seedBtn">Load Dindigul Branch Master</button></div></form>
+  </div>
+
+  <div class="panel">
+    <h2>Registered Units (<span id="uCount">0</span>)</h2>
+    <table><thead><tr><th>Name</th><th>Type</th><th>Block</th><th>Nodal Person</th><th>Contact</th><th class="num">Target</th><th class="num">Achieved</th><th class="noprint"></th></tr></thead>
+    <tbody id="uBody"></tbody></table>
+  </div>
+</section>
+
+<section class="view" id="v-report">
+  <div class="panel noprint">
+    <h2>Generate Submission</h2>
+    <div class="row">
+      <div style="min-width:250px"><label>Scope</label><select id="r_scope"></select></div>
+      <div style="min-width:200px"><label>Organisation Name</label><input id="r_org" value="Regional Office, Dindigul"></div>
+      <div style="display:flex;align-items:flex-end;gap:8px">
+        <button class="act" id="printBtn">Print / PDF</button>
+        <button class="act gh" id="csvBtn">Export CSV</button>
+        <button class="act sec" id="jsonBtn">JSON Backup</button>
+        <button class="act sec" id="impBtn">Import JSON</button>
+        <input type="file" id="impFile" accept=".json" hidden>
+      </div>
+    </div>
+  </div>
+  <div class="rep" id="repOut"></div>
+</section>
+
+<section class="view" id="v-res">
+  <div class="panel">
+    <h2>Official Links &amp; IEC Material</h2>
+    <table>
+      <tr><td><b>NMBA e-Pledge Portal</b><div class="hint">Circulate to all employees, staff &amp; stakeholders; download participation certificates.</div></td>
+          <td><a href="https://nashamukt.dosje.gov.in/epledge" target="_blank" rel="noopener">nashamukt.dosje.gov.in/epledge</a></td></tr>
+      <tr><td><b>IEC Material</b> — NMBA logo, mascot, branding kit</td>
+          <td><a href="https://drive.google.com/drive/folders/1WWEHilCyvo_MDQIGjBJn0H6D4ApPtwp1" target="_blank" rel="noopener">Google Drive folder</a></td></tr>
+      <tr><td><b>NMBA Helpline (Toll Free)</b></td><td><b style="font-size:19px;color:var(--navy)">14446</b></td></tr>
+    </table>
+  </div>
+  <div class="panel">
+    <h2>Action Checklist — 18.08.2026</h2>
+    <table id="chkTable"></table>
+  </div>
+</section>
+
+</main>
+
+<script>
+const K='nmba_dindigul_v1';
+/* localStorage is unavailable on some origins (file:// sandboxes, data: URLs, private mode).
+   Fall back to memory so the app still runs; the JSON backup is then the only persistence. */
+const STORE=(()=>{try{localStorage.setItem('__t','1');localStorage.removeItem('__t');return localStorage;}
+  catch(e){const m={};return{getItem:k=>(k in m?m[k]:null),setItem:(k,v)=>{m[k]=v;},removeItem:k=>{delete m[k];},_mem:true};}})();
+let DB;
+try{DB=JSON.parse(STORE.getItem(K)||'null')||{units:[],entries:[],checks:{}};}
+catch(e){DB={units:[],entries:[],checks:{}};}
+DB.units=DB.units||[];DB.entries=DB.entries||[];DB.checks=DB.checks||{};
+const save=()=>STORE.setItem(K,JSON.stringify(DB));
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const n=v=>Number(v)||0;
+const fmt=v=>n(v).toLocaleString('en-IN');
+
+const CHECKS=[
+ "National Pledge organised across all branches / offices / units on 18.08.2026",
+ "Maximum participation of employees, staff and stakeholders ensured",
+ "e-Pledge link circulated to all employees / staff / stakeholders",
+ "Participation certificates downloaded by participants",
+ "NMBA logo, mascot and helpline 14446 used for branding at venue",
+ "Mobilised pledge numbers captured on the NMBA Portal",
+ "Geo-tagged photograph with organisation name captured",
+ "Consolidated report submitted by 12:00 PM, 18.08.2026"
+];
+
+$$('nav button').forEach(b=>b.onclick=()=>{
+  $$('nav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  $$('.view').forEach(v=>v.classList.remove('on'));$('#v-'+b.dataset.v).classList.add('on');
+  render();
+});
+
+$('#unitForm').onsubmit=e=>{e.preventDefault();
+  DB.units.push({id:Date.now(),name:$('#u_name').value.trim(),type:$('#u_type').value,block:$('#u_block').value,
+    person:$('#u_person').value.trim(),phone:$('#u_phone').value.trim(),target:n($('#u_target').value)});
+  save();e.target.reset();$('#u_target').value=100;render();};
+
+$('#seedBtn').onclick=()=>{
+  const S=[["3933","Regional Office, Dindigul","Regional Office"],
+   ["332","Dindigul Main","Branch"],["1314","Dindigul Fort","Branch"],
+   ["1830","Dindigul Collectorate","Government Office"],
+   ["4069","Loan Processing Centre, Dindigul","Processing Centre"],
+   ["2098","RM Colony","Branch"],["910","Sembatti","Branch"],["911","Kalwarpatti","Branch"],
+   ["924","Puduchatram","Branch"],["1013","Reddiapatti","Branch"],["1044","Lakshmipuram","Branch"],
+   ["1112","Nagayakottai","Branch"],["1152","Narikkalpatti","Branch"],["1220","Salaiyur","Branch"],
+   ["1221","Marambadi","Branch"],["1258","Oddanchatram","Branch"],["1316","Palayam","Branch"],
+   ["1317","N Paraipatti","Branch"],["1401","Silukkuwarpatti","Branch"],["1789","Tamaraikulam","Branch"],
+   ["2286","Batlagundu","Branch"],["2287","Andipatti","Branch"],["2288","Natham","Branch"],
+   ["2461","Vadamadurai","Branch"],["2464","Nilakottai","Branch"],["2685","Silapadi","Branch"],
+   ["2686","Chinnalapatti","Branch"],["2702","KK Patti","Branch"],["2703","PC Patti","Branch"],
+   ["2704","T Subbulapuram","Branch"],["2705","V Gopalpatti","Branch"],["2706","K Reddiarchatram","Branch"],
+   ["3164","Sendurai","Branch"],["3165","Ponnagaram","Branch"],["3166","Thadikombu","Branch"],
+   ["3346","Vangamanuthu","Branch"],["3347","Anaipatti","Branch"],["3436","Kodaikanal","Branch"],
+   ["3437","Dharumathupatti","Branch"],["3549","Ambilikai","Branch"],["3920","Balakrishnapuram","Branch"],
+   ["4153","Kosavapatti","Branch"],["232","Pannaikadu","Branch"],["237","Sithayamkottai","Branch"],
+   ["243","Pattiveeranpatti","Branch"],["230","Vedasandur","Branch"],["376","Palani","Branch"],
+   ["175","Ayakudi","Branch"],["883","Rasingapuram","Branch"],["174","Theni Allinagaram","Branch"],
+   ["176","Cumbum","Branch"],["1560","Chinnamanur","Branch"],["1919","Uthamapalayam","Branch"],
+   ["1931","Periyakulam","Branch"],["2574","Bodinayakanur","Branch"],["3548","Boothipuram","Branch"],
+   ["1896","Theni Medical College","College / Institution"]];
+  S.forEach((r,i)=>{ if(!DB.units.some(u=>u.name===r[1]))
+    DB.units.push({id:Date.now()+i,code:r[0],name:r[1],type:r[2],block:'',person:'',phone:'',target:0}); });
+  save();render();};
+
+$('#geoBtn').onclick=()=>{
+  if(!navigator.geolocation){alert('Geolocation not supported by this browser.');return;}
+  $('#geoBtn').textContent='Locating...';
+  navigator.geolocation.getCurrentPosition(p=>{
+    $('#f_lat').value=p.coords.latitude.toFixed(6);$('#f_lng').value=p.coords.longitude.toFixed(6);
+    $('#geoBtn').textContent='Location Captured';},
+    ()=>{$('#geoBtn').textContent='Capture Location';alert('Location unavailable — please enter latitude/longitude manually.');},
+    {enableHighAccuracy:true});
+};
+
+$('#entryForm').onsubmit=e=>{e.preventDefault();
+  if(!$('#f_unit').value){alert('Add a unit first (Branches / Institutions tab).');return;}
+  const rec={id:Date.now(),unit:$('#f_unit').value,camp:$('#f_camp').value.trim(),venue:$('#f_venue').value.trim(),date:$('#f_date').value,by:$('#f_by').value.trim(),
+    total:n($('#f_total').value),women:n($('#f_women').value),youth:n($('#f_youth').value),
+    cert:n($('#f_cert').value),lat:$('#f_lat').value.trim(),lng:$('#f_lng').value.trim(),
+    rem:$('#f_rem').value.trim(),photo:''};
+  const f=$('#f_photo').files[0];
+  const done=()=>{DB.entries.push(rec);
+    try{save();}catch(err){alert('Storage full — export a JSON backup and delete older photo entries.');}
+    e.target.reset();$('#f_date').value='2026-08-18';$('#geoBtn').textContent='Capture Location';
+    $('#saveMsg').innerHTML='<span class="pill p-ok">Saved</span>';
+    setTimeout(()=>$('#saveMsg').textContent='',2500);render();};
+  if(f){const r=new FileReader();r.onload=()=>{
+      const img=new Image();
+      img.onload=()=>{
+        const c=document.createElement('canvas'),s=Math.min(1,900/Math.max(img.width,img.height));
+        c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        rec.photo=c.toDataURL('image/jpeg',0.75);done();};
+      img.onerror=done;
+      img.src=r.result;};
+    r.readAsDataURL(f);}else done();};
+
+function del(id){if(confirm('Delete this entry?')){DB.entries=DB.entries.filter(x=>x.id!==id);save();render();}}
+function delU(id){const u=DB.units.find(x=>x.id===id);
+  if(confirm('Remove unit "'+u.name+'"? Its entries are kept.')){DB.units=DB.units.filter(x=>x.id!==id);save();render();}}
+function show(src){const w=window.open('');if(w)w.document.write('<img src="'+src+'" style="max-width:100%">');}
+
+const agg=list=>list.reduce((a,e)=>({total:a.total+n(e.total),women:a.women+n(e.women),youth:a.youth+n(e.youth),
+  cert:a.cert+n(e.cert),photos:a.photos+(e.photo?1:0)}),{total:0,women:0,youth:0,cert:0,photos:0});
+
+function render(){
+  const uOpts=DB.units.map(u=>'<option value="'+esc(u.name)+'">'+esc(u.name)+'</option>').join('');
+  const cur=$('#f_unit').value;
+  $('#f_unit').innerHTML=uOpts||'<option value="">— add a unit first —</option>';
+  if(cur)$('#f_unit').value=cur;
+  const rs=$('#r_scope'),rc=rs.value;
+  rs.innerHTML='<option value="__ALL__">Consolidated — All Units (Dindigul)</option>'+uOpts;
+  if(rc)rs.value=rc;
+
+  const T=agg(DB.entries);
+  $('#k1').textContent=fmt(T.total);$('#k2').textContent=fmt(T.women);$('#k3').textContent=fmt(T.youth);
+  $('#k4').textContent=fmt(T.cert);$('#k5').textContent=fmt(T.photos);
+  const reported=DB.units.filter(u=>DB.entries.some(e=>e.unit===u.name)).length;
+  $('#k6').textContent=reported+' / '+DB.units.length;
+
+  $('#statusBody').innerHTML=DB.units.length?DB.units.map(u=>{
+    const es=DB.entries.filter(e=>e.unit===u.name),a=agg(es);
+    const pct=u.target?Math.min(100,Math.round(a.total/u.target*100)):(a.total?100:0);
+    const st=!es.length?'<span class="pill p-no">Not Reported</span>'
+      :(a.total>=u.target&&a.photos?'<span class="pill p-ok">Complete</span>':'<span class="pill p-part">Partial</span>');
+    return '<tr><td><b>'+esc(u.name)+'</b><div class="hint">'+esc(u.person||'')+(u.phone?' · '+esc(u.phone):'')+'</div></td>'+
+      '<td>'+esc(u.type)+'</td><td>'+esc(u.block)+'</td><td class="num">'+fmt(u.target)+'</td>'+
+      '<td class="num"><b>'+fmt(a.total)+'</b></td>'+
+      '<td><div class="bar"><i style="width:'+pct+'%"></i></div><span class="hint">'+pct+'%</span></td>'+
+      '<td>'+(a.photos?'<span class="pill p-ok">'+a.photos+'</span>':'<span class="pill p-no">0</span>')+'</td><td>'+st+'</td></tr>';
+  }).join(''):'<tr><td colspan="8" class="empty">No units registered. Go to <b>Branches / Institutions</b> and click &ldquo;Load Dindigul Branch Master&rdquo;.</td></tr>';
+
+  const types=[...new Set(DB.units.map(u=>u.type))];
+  $('#catBody').innerHTML=types.length?types.map(t=>{
+    const names=DB.units.filter(u=>u.type===t).map(u=>u.name);
+    const a=agg(DB.entries.filter(e=>names.includes(e.unit)));
+    return '<tr><td>'+esc(t)+'</td><td class="num">'+fmt(a.total)+'</td><td class="num">'+fmt(a.women)+
+      '</td><td class="num">'+fmt(a.youth)+'</td><td class="num">'+fmt(a.cert)+'</td></tr>';
+  }).join('')+'<tr style="font-weight:700;background:#eef1f6"><td>TOTAL</td><td class="num">'+fmt(T.total)+
+    '</td><td class="num">'+fmt(T.women)+'</td><td class="num">'+fmt(T.youth)+'</td><td class="num">'+fmt(T.cert)+'</td></tr>'
+   :'<tr><td colspan="5" class="empty">No data yet.</td></tr>';
+
+  $('#entCount').textContent=DB.entries.length;
+  $('#entBody').innerHTML=DB.entries.length?[...DB.entries].reverse().map(e=>
+    '<tr><td>'+(e.photo?'<img class="thumb" src="'+e.photo+'" onclick="show(this.src)">':'<span class="hint">—</span>')+'</td>'+
+    '<td>'+esc(e.unit)+'<div class="hint">'+esc(e.camp||'')+(e.venue?' — '+esc(e.venue):'')+(e.by?'<br>'+esc(e.by):'')+'</div></td><td>'+esc(e.date)+'</td>'+
+    '<td class="num">'+fmt(e.total)+'</td><td class="num">'+fmt(e.women)+'</td><td class="num">'+fmt(e.youth)+
+    '</td><td class="num">'+fmt(e.cert)+'</td>'+
+    '<td class="geo">'+(e.lat?esc(e.lat)+', '+esc(e.lng):'<span class="hint">not tagged</span>')+'</td>'+
+    '<td class="noprint"><button class="dl" onclick="del('+e.id+')">Delete</button></td></tr>').join('')
+    :'<tr><td colspan="9" class="empty">No entries recorded yet.</td></tr>';
+
+  $('#uCount').textContent=DB.units.length;
+  $('#uBody').innerHTML=DB.units.length?DB.units.map(u=>{
+    const a=agg(DB.entries.filter(e=>e.unit===u.name));
+    return '<tr><td><b>'+esc(u.name)+'</b></td><td>'+esc(u.type)+'</td><td>'+esc(u.block)+'</td><td>'+
+      esc(u.person||'—')+'</td><td>'+esc(u.phone||'—')+'</td><td class="num">'+fmt(u.target)+
+      '</td><td class="num">'+fmt(a.total)+'</td>'+
+      '<td class="noprint"><button class="dl" onclick="delU('+u.id+')">Remove</button></td></tr>';}).join('')
+    :'<tr><td colspan="8" class="empty">No units added yet.</td></tr>';
+
+  $('#chkTable').innerHTML=CHECKS.map((c,i)=>
+    '<tr><td style="width:34px"><input type="checkbox" style="width:auto" '+(DB.checks[i]?'checked':'')+
+    ' onchange="DB.checks['+i+']=this.checked;save()"></td><td>'+c+'</td></tr>').join('');
+
+  renderReport();
+}
+
+function scopeEntries(){const s=$('#r_scope').value;
+  return s&&s!=='__ALL__'?DB.entries.filter(e=>e.unit===s):DB.entries;}
+
+function renderReport(){
+  const es=scopeEntries(),a=agg(es),s=$('#r_scope').value;
+  const org=$('#r_org').value||'Regional Office, Dindigul';
+  const title=(!s||s==='__ALL__')?org+' (Consolidated — All Branches / Institutions)':s;
+  const rows=[["1.","Number of People took National Pledge Against Drug Abuse",a.total],
+    ["2.","No of Women took the pledge",a.women],
+    ["3.","No of Youth took the pledge",a.youth],
+    ["4.","No of e-certificate generated",a.cert]];
+  const photos=es.filter(e=>e.photo);
+  $('#repOut').innerHTML=
+   '<h3>NASHA MUKT BHARAT ABHIYAAN (NMBA)</h3>'+
+   '<div class="cen">National Pledge Against Drug Abuse — 18<sup>th</sup> August 2026<br>'+
+   'Department of Social Justice &amp; Empowerment (DoSJE), Government of India<br>'+
+   '<b>'+esc(title)+'</b></div>'+
+   '<table><thead><tr><th style="width:60px">Sr. No</th><th>Particulars</th>'+
+   '<th class="num" style="width:140px">Numbers</th></tr></thead><tbody>'+
+   rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+esc(r[1])+'</td><td class="num"><b>'+fmt(r[2])+'</b></td></tr>').join('')+
+   '<tr><td>5.</td><td>Geo Tagged Photo with name of Organisation'+
+   (photos.length?'<div class="photostrip">'+photos.map(p=>'<figure><img src="'+p.photo+'" onclick="show(this.src)">'+
+     '<figcaption><b>'+esc(p.unit)+'</b><br>'+esc(p.date)+
+     (p.lat?'<br>Lat '+esc(p.lat)+', Long '+esc(p.lng):'')+'</figcaption></figure>').join('')+'</div>'
+    :'<div class="hint">No geo-tagged photograph attached.</div>')+
+   '</td><td class="num">'+photos.length+'</td></tr></tbody></table>'+
+   '<p class="hint">Units covered: '+new Set(es.map(e=>e.unit)).size+' &middot; Entries: '+es.length+
+   ' &middot; Helpline 14446 &middot; e-Pledge: nashamukt.dosje.gov.in/epledge</p>';
+}
+$('#r_scope').onchange=renderReport;
+$('#r_org').oninput=renderReport;
+$('#printBtn').onclick=()=>window.print();
+
+function dlFile(name,blob){const u=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);}
+
+$('#csvBtn').onclick=()=>{
+  const h=['Branch','Type','Block','Camp','Venue','Date','Total','Women','Youth','eCerts','Latitude','Longitude','ConductedBy','Remarks'];
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const es=scopeEntries();
+  const lines=es.map(e=>{const u=DB.units.find(x=>x.name===e.unit)||{};
+    return [e.unit,u.type||'',u.block||'',e.camp||'',e.venue||'',e.date,e.total,e.women,e.youth,e.cert,e.lat,e.lng,e.by,e.rem].map(q).join(',');});
+  const a=agg(es);
+  lines.push(['TOTAL','','','',a.total,a.women,a.youth,a.cert,'','','',''].map(q).join(','));
+  dlFile('NMBA_Pledge_Report_18Aug2026.csv',new Blob(['﻿'+h.join(',')+'\n'+lines.join('\n')],{type:'text/csv'}));};
+
+$('#jsonBtn').onclick=()=>dlFile('NMBA_backup.json',new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}));
+$('#impBtn').onclick=()=>$('#impFile').click();
+$('#impFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);
+    const ids=new Set(DB.entries.map(x=>x.id));(d.entries||[]).forEach(x=>{if(!ids.has(x.id))DB.entries.push(x);});
+    const nm=new Set(DB.units.map(x=>x.name));(d.units||[]).forEach(x=>{if(!nm.has(x.name))DB.units.push(x);});
+    save();render();alert('Merged '+(d.entries||[]).length+' entries and '+(d.units||[]).length+' units from file.');
+  }catch(err){alert('Invalid JSON file.');}};
+  r.readAsText(f);e.target.value='';};
+
+if(STORE._mem){const w=document.createElement('div');
+  w.className='hint noprint';
+  w.style.cssText='background:#fdecea;color:#c0392b;padding:8px 20px;font-weight:600;margin:0';
+  w.textContent='Note: this browser is blocking local storage for this page, so data will be lost on refresh. Open index.html from a folder (or a local web server) and use JSON Backup to save your work.';
+  document.body.insertBefore(w,document.querySelector('main'));}
+
+render();
+</script>
+</body>
+</html>

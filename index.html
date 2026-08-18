@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#254aa0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>NMBA Pledge — IOB Dindigul</title>
+<style>
+/* ============================================================ theme
+   Built on the IOB mark (#254aa0) with the campaign's sunrise accents. */
+:root{
+  --iob:#254aa0; --iob-dk:#18306b; --iob-lt:#eef2fb; --iob-mid:#4a6dc0;
+  --saffron:#f28c28; --saffron-lt:#ffd9a8; --gold:#f7b733;
+  --green:#1a8a3c; --green-lt:#d9f0de;
+  --paper:#ffffff; --bg:#f2f5fa;
+  --ink:#17203a; --muted:#5f6b80; --line:#e3e8f0;
+  --bad:#c0392b; --bad-lt:#fdecea; --warn:#b57200; --warn-lt:#fdf3e0;
+  --r:15px; --sh:0 2px 10px rgba(23,32,58,.07); --sh-up:0 -2px 14px rgba(23,32,58,.10);
+  --tap:48px; --barh:56px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:rgba(37,74,160,.12)}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.55 "Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,system-ui,sans-serif;
+  padding-bottom:calc(70px + env(safe-area-inset-bottom));overflow-x:hidden}
+
+/* ------------------------------------------------------------ app bar */
+.appbar{position:sticky;top:0;z-index:40;background:var(--iob);color:#fff;
+  padding:calc(8px + env(safe-area-inset-top)) 13px 8px;display:flex;align-items:center;gap:10px;
+  box-shadow:0 2px 10px rgba(24,48,107,.28)}
+.logo{background:#fff;border-radius:8px;padding:4px 7px;flex:none;height:36px;
+  display:flex;align-items:center}
+.logo img{height:26px;width:auto;display:block}
+.logo .fb{font-weight:800;color:var(--iob);font-size:15px;letter-spacing:.5px}
+.appbar .t{flex:1;min-width:0}
+.appbar .t b{display:block;font-size:13px;line-height:1.2;font-weight:700}
+.appbar .t span{display:block;font-size:10.5px;opacity:.85;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.tel{flex:none;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.32);
+  color:#fff;border-radius:9px;padding:4px 9px;text-align:center;text-decoration:none;line-height:1.1}
+.tel b{font-size:14px;display:block;letter-spacing:.5px}
+.tel span{font-size:8.5px;opacity:.85;text-transform:uppercase;letter-spacing:.4px}
+
+.note{padding:9px 14px;font-size:12.5px;font-weight:600;display:none}
+.note.on{display:block}
+.note.err{background:var(--bad-lt);color:var(--bad)}
+.note.warn{background:var(--warn-lt);color:var(--warn)}
+
+/* -------------------------------------------------------------- views */
+main{padding:13px 12px 22px;max-width:1150px;margin:0 auto}
+.view{display:none;animation:in .18s ease-out}
+.view.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
+  padding:15px 14px;margin-bottom:13px;box-shadow:var(--sh)}
+.card>h2{margin:0 0 13px;font-size:15px;color:var(--iob-dk);display:flex;align-items:center;gap:8px}
+.card>h2::before{content:"";width:4px;height:16px;border-radius:3px;
+  background:linear-gradient(var(--saffron),var(--green));flex:none}
+.card>h2 .r{margin-left:auto;font-size:11px;font-weight:400;color:var(--muted);text-align:right}
+
+/* --------------------------------------------------------------- form
+   NOTE: field-label styling is scoped to .f>label so it never touches the
+   photo button, which is also a <label>. */
+.f{margin-bottom:12px}
+.f:last-child{margin-bottom:0}
+.f>label{display:block;font-size:11.5px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+.f>label .req{color:var(--bad)}
+input,select,textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);
+  padding:12px 13px;border:1.5px solid #cfd6e4;border-radius:11px;background:#fff;
+  appearance:none;-webkit-appearance:none;text-transform:none}
+select{background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235f6b80' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--iob);
+  box-shadow:0 0 0 3px rgba(37,74,160,.15)}
+textarea{min-height:64px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:11.5px;color:var(--muted);line-height:1.45;margin-top:6px}
+
+/* photo picker */
+.pick{position:relative;display:block;margin:0}
+.pick input{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.pick .box{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;min-height:64px;padding:14px;text-align:center;border:1.5px dashed #c3cdde;
+  border-radius:12px;background:var(--iob-lt);color:var(--iob);
+  font-size:15px;font-weight:700;text-transform:none;letter-spacing:0}
+.pick .box small{font-weight:400;color:var(--muted);font-size:11.5px;text-transform:none}
+.pick.has .box{border-style:solid;border-color:var(--green);background:var(--green-lt);color:#12662d}
+.shot{margin-top:10px;display:none}
+.shot.on{display:block}
+.shot img{width:100%;border-radius:11px;border:1px solid var(--line);display:block}
+.shot .cap{font-size:11px;color:var(--muted);margin-top:5px;text-align:center}
+
+/* buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
+  min-height:var(--tap);padding:13px;border:0;border-radius:12px;font:inherit;font-size:15.5px;
+  font-weight:700;cursor:pointer;background:var(--iob);color:#fff;margin-top:10px}
+.btn:active{transform:scale(.985)}
+.btn[disabled]{opacity:.55}
+.btn.go{background:linear-gradient(135deg,var(--saffron),#e0721a)}
+.btn.gr{background:var(--green)}
+.btn.gh{background:#fff;color:var(--iob);border:1.5px solid var(--iob)}
+.btn.sm{width:auto;min-height:36px;padding:7px 14px;font-size:12.5px;margin:0;border-radius:9px}
+
+.msg{margin-top:11px;padding:12px 13px;border-radius:11px;font-size:13.5px;
+  font-weight:600;display:none;line-height:1.45}
+.msg.on{display:block}
+.msg.ok{background:var(--green-lt);color:#12662d}
+.msg.err{background:var(--bad-lt);color:var(--bad)}
+.msg.wait{background:var(--iob-lt);color:var(--iob)}
+
+.org{display:none;margin-top:11px;border-radius:12px;padding:11px 12px;font-size:12.5px;
+  background:linear-gradient(135deg,#fff5e6,#fdfbf6);border:1px solid var(--saffron-lt)}
+.org.on{display:block}
+.org b{color:var(--iob-dk)}
+.org .who{font-size:13.5px;font-weight:700;color:var(--ink)}
+
+/* ---------------------------------------------------------------- KPI */
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px}
+.kpi{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:12px;
+  box-shadow:var(--sh);border-top:3px solid var(--iob)}
+.kpi .n{font-size:23px;font-weight:800;color:var(--iob-dk);line-height:1.05;
+  font-variant-numeric:tabular-nums}
+.kpi .l{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.4px;margin-top:3px}
+.kpi.a{border-top-color:var(--saffron)}.kpi.a .n{color:#b8600d}
+.kpi.b{border-top-color:var(--green)}.kpi.b .n{color:#12662d}
+
+/* --------------------------------------------------------- list items */
+.row{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .gr1{flex:1;min-width:0}
+.row .nm{font-weight:700;font-size:14px;line-height:1.25;overflow-wrap:anywhere}
+.row .sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.row .val{text-align:right;flex:none}
+.row .val b{font-size:17px;font-variant-numeric:tabular-nums;color:var(--iob-dk)}
+.row .val span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase}
+.bar{height:7px;border-radius:4px;background:#e7ecf4;overflow:hidden;margin-top:7px}
+.bar i{display:block;height:100%;border-radius:4px;
+  background:linear-gradient(90deg,var(--saffron),var(--gold),var(--green))}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.3px}
+.t-ok{background:var(--green-lt);color:#12662d}
+.t-no{background:var(--bad-lt);color:var(--bad)}
+.t-part{background:var(--warn-lt);color:var(--warn)}
+.thumb{width:52px;height:52px;border-radius:10px;object-fit:cover;flex:none;
+  border:1px solid var(--line);background:var(--iob-lt)}
+.camps{margin:9px 0 0;padding:9px 0 0;border-top:1px dashed var(--line);display:none}
+.camps.on{display:block}
+.camps .c{display:flex;gap:10px;align-items:center;padding:6px 0;font-size:12.5px}
+.camps .c .cn{flex:1;min-width:0;color:var(--muted)}
+.camps .c b{font-variant-numeric:tabular-nums}
+.chev{flex:none;width:22px;text-align:center;color:var(--iob-mid);font-size:12px;
+  transition:transform .15s}
+.chev.open{transform:rotate(90deg)}
+.empty{text-align:center;padding:26px 12px;color:var(--muted);font-size:13.5px}
+
+/* ------------------------------------------------------------- report */
+.rep{background:#fff;border-radius:var(--r);border:1px solid var(--line);padding:17px 14px;
+  box-shadow:var(--sh)}
+.rep .hd{text-align:center;border-bottom:2px solid var(--iob);padding-bottom:11px;margin-bottom:13px}
+.rep .hd h3{margin:0 0 3px;font-size:15px;color:var(--iob-dk);letter-spacing:.2px}
+.rep .hd p{margin:0;font-size:11.5px;color:var(--muted);line-height:1.4}
+.rep .hd .who{padding-top:6px;font-weight:700;color:var(--ink);font-size:12.5px}
+.rt{width:100%;border-collapse:collapse;font-size:13px}
+.rt th,.rt td{border:1px solid #b9c2d2;padding:8px 9px;text-align:left;vertical-align:top}
+.rt th{background:var(--iob-lt);color:var(--iob-dk);font-size:11px;text-transform:uppercase;
+  letter-spacing:.4px}
+.rt td.n{text-align:right;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pics{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
+.pics figure{margin:0;font-size:9.5px;line-height:1.3}
+.pics img{width:100%;height:92px;object-fit:cover;border:1px solid #b9c2d2;border-radius:6px;
+  background:var(--iob-lt)}
+.pics figcaption{margin-top:2px;color:var(--muted)}
+
+/* --------------------------------------------------------- info lists */
+.lnk{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--line);
+  text-decoration:none;color:inherit}
+.lnk:last-child{border-bottom:0}
+.lnk .ic{width:38px;height:38px;border-radius:10px;background:var(--iob-lt);color:var(--iob);
+  display:grid;place-items:center;font-size:17px;flex:none}
+.lnk .gr1 b{display:block;font-size:13.5px}
+.lnk .gr1 span{font-size:11.5px;color:var(--muted)}
+.chk{display:flex;gap:11px;align-items:flex-start;padding:10px 0;
+  border-bottom:1px solid var(--line);font-size:13px;line-height:1.4}
+.chk:last-child{border-bottom:0}
+.chk input{width:21px;height:21px;flex:none;margin:1px 0 0;accent-color:var(--green)}
+
+/* ----------------------------------------------------------- tab bar */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;background:#fff;
+  border-top:1px solid var(--line);box-shadow:var(--sh-up);
+  padding-bottom:env(safe-area-inset-bottom)}
+.tabs button{flex:1;background:none;border:0;padding:7px 2px 8px;cursor:pointer;color:var(--muted);
+  font:inherit;font-size:10.5px;font-weight:700;display:flex;flex-direction:column;
+  align-items:center;gap:3px;min-height:56px;justify-content:center;position:relative}
+.tabs button .i{font-size:19px;line-height:1}
+.tabs button.on{color:var(--iob)}
+.tabs button.on::before{content:"";position:absolute;top:0;width:26px;height:3px;
+  border-radius:0 0 3px 3px;background:var(--iob)}
+
+/* -------------------------------------------------------- wider screens
+   The app bar is sticky on phones; on desktop it scrolls away and the tab
+   strip alone sticks, so the two can never occupy the same line. */
+@media screen and (min-width:760px){
+  body{padding-bottom:0}
+  .appbar{position:relative;padding:11px 22px}
+  .appbar .t b{font-size:16px}.appbar .t span{font-size:12px}
+  .logo{height:46px}.logo img{height:34px}
+  main{padding:18px 22px 40px}
+  .kpis{grid-template-columns:repeat(4,1fr);gap:12px}
+  .kpi .n{font-size:27px}
+  .two{gap:14px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .btn{width:auto;min-width:190px;display:inline-flex}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .pics{grid-template-columns:repeat(4,1fr)}
+  .pics img{height:105px}
+  .shot img{max-height:340px;object-fit:contain;background:#0d1424}
+  .tabs{position:sticky;top:0;bottom:auto;z-index:45;box-shadow:var(--sh);
+    border-top:0;border-bottom:1px solid var(--line);justify-content:center}
+  .tabs button{flex:0 0 auto;flex-direction:row;gap:7px;font-size:14px;padding:13px 22px;
+    min-height:0}
+  .tabs button .i{font-size:16px}
+  .tabs button.on::before{top:auto;bottom:0;width:70%;border-radius:3px 3px 0 0}
+}
+
+@media print{
+  .appbar,.tabs,.note,.noprint{display:none!important}
+  body{background:#fff;padding:0}
+  main{padding:0;max-width:none}
+  .rep{border:0;box-shadow:none;padding:0}
+  .pics{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <span class="logo"><img src="assets/logo.svg" alt="Indian Overseas Bank"
+      onerror="this.outerHTML='<span class=&quot;fb&quot;>IOB</span>'"></span>
+  <span class="t"><b>Nasha Mukt Bharat Abhiyaan</b>
+    <span>National Pledge Against Drug Abuse &middot; 18 Aug 2026 &middot; RO Dindigul</span></span>
+  <a class="tel" href="tel:14446"><b>14446</b><span>Helpline</span></a>
+</div>
+
+<div class="note" id="note"></div>
+
+<nav class="tabs">
+  <button class="on" data-v="submit"><span class="i">&#9998;</span>Submit</button>
+  <button data-v="dash"><span class="i">&#9632;</span>Dashboard</button>
+  <button data-v="report"><span class="i">&#9776;</span>Report</button>
+  <button data-v="info"><span class="i">&#9873;</span>Info</button>
+</nav>
+
+<main>
+
+<!-- ============================================================= SUBMIT -->
+<section class="view on" id="v-submit">
+  <div class="card">
+    <h2>Your Branch</h2>
+    <div class="f">
+      <label>Branch / Institution <span class="req">*</span></label>
+      <select id="f_unit"></select>
+    </div>
+    <div class="f" id="pinWrap">
+      <label>PIN <span class="req">*</span></label>
+      <input id="f_pin" inputmode="numeric" autocomplete="off" placeholder="Issued by the Regional Office">
+    </div>
+    <div class="org" id="orgBox"></div>
+  </div>
+
+  <div class="card">
+    <h2>Camp Details</h2>
+    <div class="f"><label>Camp Name / No. <span class="req">*</span></label>
+      <input id="f_camp" placeholder="Camp 1 — Morning Assembly"></div>
+    <div class="f"><label>Venue</label>
+      <input id="f_venue" placeholder="Where the pledge was administered"></div>
+    <div class="f"><label>Date</label><input type="date" id="f_date" value="2026-08-18"></div>
+    <div class="grid3">
+      <div class="f"><label>Conducted By</label><input id="f_by"></div>
+      <div class="f"><label>Designation</label><input id="f_desig"></div>
+      <div class="f"><label>Contact</label><input id="f_phone" inputmode="tel"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Pledge Figures</h2>
+    <div class="f"><label>Total Persons Took Pledge <span class="req">*</span></label>
+      <input type="number" id="f_total" min="1" inputmode="numeric" placeholder="0"></div>
+    <div class="two">
+      <div class="f"><label>Women</label>
+        <input type="number" id="f_women" min="0" inputmode="numeric" value="0"></div>
+      <div class="f"><label>Youth (15–29 years)</label>
+        <input type="number" id="f_youth" min="0" inputmode="numeric" value="0"></div>
+    </div>
+    <div class="f"><label>e-Certificates Generated</label>
+      <input type="number" id="f_cert" min="0" inputmode="numeric" value="0"></div>
+  </div>
+
+  <div class="card">
+    <h2>Geo-tagged Photo</h2>
+    <button type="button" class="btn gh" id="geoBtn" style="margin-top:0">Capture Location</button>
+    <div class="two" style="margin-top:10px">
+      <div class="f"><label>Latitude</label><input id="f_lat" inputmode="decimal" placeholder="10.3673"></div>
+      <div class="f"><label>Longitude</label><input id="f_lng" inputmode="decimal" placeholder="77.9803"></div>
+    </div>
+    <label class="pick" id="pickWrap">
+      <input type="file" id="f_photo" accept="image/*">
+      <span class="box" id="pickBox">Take or Choose Photo
+        <small>Capture the location first so it is stamped on the image</small></span>
+    </label>
+    <div class="shot" id="shot">
+      <img id="shotImg" alt="Photograph with the campaign stamp">
+      <div class="cap">Stamped automatically — this is exactly what is submitted.</div>
+    </div>
+
+    <div class="f" style="margin-top:12px"><label>Remarks</label>
+      <textarea id="f_rem" placeholder="Activity details, stakeholders involved"></textarea></div>
+
+    <button type="button" class="btn go" id="subBtn">Submit Camp</button>
+    <button type="button" class="btn gr" id="nextBtn">Save &amp; Add Another Camp</button>
+    <div class="msg" id="subMsg"></div>
+    <p class="hint">A branch may submit as many camps as it conducts — each adds to the branch
+      total. Re-sending the <b>same camp name on the same date</b> replaces those figures, so a
+      correction is never counted twice.</p>
+  </div>
+
+  <div class="card" id="myPanel" style="display:none">
+    <h2>Camps Recorded <span class="r" id="myName"></span></h2>
+    <div id="myList"></div>
+  </div>
+</section>
+
+<!-- ========================================================== DASHBOARD -->
+<section class="view" id="v-dash">
+  <div class="kpis">
+    <div class="kpi"><div class="n" id="k1">0</div><div class="l">Total Pledges</div></div>
+    <div class="kpi a"><div class="n" id="k2">0</div><div class="l">Women</div></div>
+    <div class="kpi b"><div class="n" id="k3">0</div><div class="l">Youth</div></div>
+    <div class="kpi"><div class="n" id="k4">0</div><div class="l">e-Certificates</div></div>
+    <div class="kpi a"><div class="n" id="k5">0</div><div class="l">Camps Held</div></div>
+    <div class="kpi b"><div class="n" id="k6">0/0</div><div class="l">Branches Reported</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Branches
+      <span class="r" id="sync">syncing…<br>
+        <button class="btn gh sm noprint" id="refreshBtn" style="margin-top:4px">Refresh</button></span>
+    </h2>
+    <div class="f noprint"><input id="q" placeholder="Search branch…" autocomplete="off"></div>
+    <div id="branchList"></div>
+  </div>
+
+  <div class="card">
+    <h2>By Category</h2>
+    <div id="catList"></div>
+  </div>
+</section>
+
+<!-- ============================================================= REPORT -->
+<section class="view" id="v-report">
+  <div class="card noprint">
+    <h2>Generate Submission</h2>
+    <div class="f"><label>Scope</label><select id="r_scope"></select></div>
+    <div class="f"><label>Organisation Name</label>
+      <input id="r_org" value="Indian Overseas Bank, Regional Office, Dindigul"></div>
+    <div class="btnrow">
+      <button class="btn" id="printBtn">Print / Save as PDF</button>
+      <button class="btn gr" id="csvBtn">Export CSV</button>
+    </div>
+    <p class="hint">Print produces the DoSJE format (Sr. No 1–5) with the geo-tagged
+      photographs attached. Due by 12:00 PM, 18.08.2026.</p>
+  </div>
+  <div class="rep" id="repOut"></div>
+</section>
+
+<!-- =============================================================== INFO -->
+<section class="view" id="v-info">
+  <div class="card">
+    <h2>Official Links</h2>
+    <a class="lnk" href="https://nashamukt.dosje.gov.in/epledge" target="_blank" rel="noopener">
+      <span class="ic">&#10143;</span><span class="gr1"><b>NMBA e-Pledge Portal</b>
+      <span>Take the pledge &amp; download the certificate</span></span></a>
+    <a class="lnk" href="https://drive.google.com/drive/folders/1WWEHilCyvo_MDQIGjBJn0H6D4ApPtwp1"
+       target="_blank" rel="noopener">
+      <span class="ic">&#9660;</span><span class="gr1"><b>IEC Material</b>
+      <span>Logo, mascot &amp; branding kit</span></span></a>
+    <a class="lnk" href="tel:14446">
+      <span class="ic">&#9742;</span><span class="gr1"><b>NMBA Helpline — 14446</b>
+      <span>Toll free, all India</span></span></a>
+    <a class="lnk" href="offline.html">
+      <span class="ic">&#9723;</span><span class="gr1"><b>Offline Form</b>
+      <span>For venues with no connectivity</span></span></a>
+  </div>
+
+  <div class="card">
+    <h2>Checklist — 18.08.2026</h2>
+    <div id="chkList"></div>
+    <p class="hint">Stored on this phone only — a personal reminder, not a submission.</p>
+  </div>
+
+  <div class="card">
+    <h2>For the Regional Office</h2>
+    <p class="hint" style="font-size:13px">
+      The <b>Branches</b> sheet is the master list — fill in each branch's organiser,
+      designation, contact and target, and the form pre-fills itself for that officer.
+      Every camp lands in the <b>Camps</b> sheet; photographs go to the Drive folder
+      <b>NMBA Pledge Photos 2026</b>. PINs are issued from the master sheet and take
+      effect immediately.</p>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* ====================================================================
+   CONFIG — paste the Apps Script Web App URL (ends in /exec) here.
+   ==================================================================== */
+var API_URL = "https://script.google.com/macros/s/AKfycbxBf47gyyGOcE14G1LD9Kx8f93x3nCLFRPv_iB8jeEPMED4RzHAP2QdNnmcDMxGV-u6nw/exec";
+
+var STAMP_LINE = "IOB Dindigul - Nasha Mukt Bharat Abhiyaan 2026";
+
+var $=function(s){return document.querySelector(s)},
+    $$=function(s){return [].slice.call(document.querySelectorAll(s))},
+    esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];})},
+    n=function(v){return Number(v)||0},
+    fmt=function(v){return n(v).toLocaleString('en-IN')};
+
+(function(){var m=location.search.match(/[?&]api=([^&]+)/);if(m)API_URL=decodeURIComponent(m[1]);})();
+
+var STORE=(function(){try{localStorage.setItem('_t','1');localStorage.removeItem('_t');return localStorage;}
+  catch(e){var o={};return{getItem:function(k){return k in o?o[k]:null},setItem:function(k,v){o[k]=v}};}})();
+
+/* The 57-branch master, embedded so the dropdown is usable the moment the
+   page opens — even before the Sheet responds. The server's list replaces
+   this as soon as it arrives (it also carries organiser and target). */
+var SEED=[['3933','Regional Office, Dindigul','Regional Office'],
+['332','Dindigul Main','Branch'],['1314','Dindigul Fort','Branch'],
+['1830','Dindigul Collectorate','Government Office'],
+['4069','Loan Processing Centre, Dindigul','Processing Centre'],
+['2098','RM Colony','Branch'],['910','Sembatti','Branch'],['911','Kalwarpatti','Branch'],
+['924','Puduchatram','Branch'],['1013','Reddiapatti','Branch'],['1044','Lakshmipuram','Branch'],
+['1112','Nagayakottai','Branch'],['1152','Narikkalpatti','Branch'],['1220','Salaiyur','Branch'],
+['1221','Marambadi','Branch'],['1258','Oddanchatram','Branch'],['1316','Palayam','Branch'],
+['1317','N Paraipatti','Branch'],['1401','Silukkuwarpatti','Branch'],['1789','Tamaraikulam','Branch'],
+['2286','Batlagundu','Branch'],['2287','Andipatti','Branch'],['2288','Natham','Branch'],
+['2461','Vadamadurai','Branch'],['2464','Nilakottai','Branch'],['2685','Silapadi','Branch'],
+['2686','Chinnalapatti','Branch'],['2702','KK Patti','Branch'],['2703','PC Patti','Branch'],
+['2704','T Subbulapuram','Branch'],['2705','V Gopalpatti','Branch'],['2706','K Reddiarchatram','Branch'],
+['3164','Sendurai','Branch'],['3165','Ponnagaram','Branch'],['3166','Thadikombu','Branch'],
+['3346','Vangamanuthu','Branch'],['3347','Anaipatti','Branch'],['3436','Kodaikanal','Branch'],
+['3437','Dharumathupatti','Branch'],['3549','Ambilikai','Branch'],['3920','Balakrishnapuram','Branch'],
+['4153','Kosavapatti','Branch'],['232','Pannaikadu','Branch'],['237','Sithayamkottai','Branch'],
+['243','Pattiveeranpatti','Branch'],['230','Vedasandur','Branch'],['376','Palani','Branch'],
+['175','Ayakudi','Branch'],['883','Rasingapuram','Branch'],['174','Theni Allinagaram','Branch'],
+['176','Cumbum','Branch'],['1560','Chinnamanur','Branch'],['1919','Uthamapalayam','Branch'],
+['1931','Periyakulam','Branch'],['2574','Bodinayakanur','Branch'],['3548','Boothipuram','Branch'],
+['1896','Theni Medical College','College / Institution']];
+
+var DATA={branches:SEED.map(function(r){
+  return {code:r[0],name:r[1],type:r[2],block:'',person:'',desig:'',phone:'',
+          target:0,pinReq:true};}),camps:[]};
+
+var open={}, rawPhoto='', photoData='';
+
+var CHECKS=[
+ "Pledge organised across all branches / offices / units",
+ "Maximum participation of employees, staff and stakeholders",
+ "e-Pledge link circulated to all staff and stakeholders",
+ "Participation certificates downloaded",
+ "NMBA logo, mascot and helpline 14446 used for branding",
+ "Pledge numbers captured on the NMBA Portal",
+ "Geo-tagged photograph with organisation name taken",
+ "Consolidated report submitted by 12:00 PM"];
+var checks={}; try{checks=JSON.parse(STORE.getItem('nmba_chk')||'{}');}catch(e){}
+
+function note(cls,txt){var b=$('#note');b.className='note'+(txt?' on '+cls:'');b.innerHTML=txt||'';}
+
+/* ------------------------------------------------------------ transport */
+function apiGet(){
+  return new Promise(function(res,rej){
+    if(!API_URL)return rej(new Error('not configured'));
+    var cb='cb_'+Math.floor(Math.random()*1e9),s=document.createElement('script'),done=false;
+    var clean=function(){try{delete window[cb];}catch(e){window[cb]=undefined;}
+      if(s.parentNode)s.parentNode.removeChild(s);};
+    window[cb]=function(d){done=true;clean();res(d);};
+    s.onerror=function(){if(!done){clean();rej(new Error('network'));}};
+    s.src=API_URL+(API_URL.indexOf('?')<0?'?':'&')+'callback='+cb+'&t='+Date.now();
+    document.head.appendChild(s);
+    setTimeout(function(){if(!done){clean();rej(new Error('timeout'));}},25000);
+  });
+}
+function apiPost(p){
+  return fetch(API_URL,{method:'POST',redirect:'follow',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(p)})
+   .then(function(r){return r.text();})
+   .then(function(t){try{return JSON.parse(t);}catch(e){throw new Error('Unexpected server reply.');}});
+}
+function load(quiet){
+  if(!API_URL){note('err','Not connected — paste the Apps Script URL into index.html (see SETUP.md). '+
+    'The branch list below is the built-in copy; figures cannot be submitted yet.');
+    draw();return Promise.resolve();}
+  if(!quiet)$('#sync').firstChild.nodeValue='syncing…';
+  return apiGet().then(function(d){
+    if(!d||!d.ok)throw new Error((d&&d.error)||'Server error');
+    if(d.branches&&d.branches.length)DATA.branches=d.branches;
+    DATA.camps=d.camps||[];note('','');
+    $('#sync').firstChild.nodeValue=new Date().toLocaleTimeString('en-IN',
+      {hour:'2-digit',minute:'2-digit'});
+    draw();
+  }).catch(function(e){
+    $('#sync').firstChild.nodeValue='offline';
+    note('warn','Cannot reach the server ('+esc(e.message)+'). Showing the last figures loaded.');
+    draw();
+  });
+}
+
+/* ---------------------------------------------------------------- tabs */
+$$('.tabs button').forEach(function(b){
+  b.onclick=function(){
+    $$('.tabs button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on');
+    $$('.view').forEach(function(v){v.classList.remove('on');});
+    $('#v-'+b.dataset.v).classList.add('on');
+    window.scrollTo(0,0);
+    if(b.dataset.v==='dash'||b.dataset.v==='report')load(true);
+  };
+});
+
+/* ------------------------------------------------------------- branches */
+function byName(nm){return DATA.branches.filter(function(b){return b.name===nm;})[0]||null;}
+function campsOf(nm){return DATA.camps.filter(function(c){return c.unit===nm;});}
+function agg(l){return l.reduce(function(a,e){return{
+  total:a.total+n(e.total),women:a.women+n(e.women),youth:a.youth+n(e.youth),
+  cert:a.cert+n(e.cert),photos:a.photos+(e.photo?1:0)};},
+  {total:0,women:0,youth:0,cert:0,photos:0});}
+
+$('#f_unit').onchange=function(){
+  var b=byName(this.value),box=$('#orgBox');
+  if(!b){box.className='org';$('#myPanel').style.display='none';restamp();return;}
+  $('#pinWrap').style.display=b.pinReq===false?'none':'';
+  $('#f_by').value=b.person||'';$('#f_desig').value=b.desig||'';$('#f_phone').value=b.phone||'';
+  box.className='org on';
+  box.innerHTML='<div class="who">'+esc(b.person||'Organiser not yet recorded in the master')+'</div>'+
+    (b.desig?esc(b.desig)+'<br>':'')+(b.phone?esc(b.phone)+'<br>':'')+
+    'Branch code <b>'+esc(b.code)+'</b> &middot; '+esc(b.type)+
+    (b.block?' &middot; '+esc(b.block):'')+
+    (b.target?' &middot; Target <b>'+fmt(b.target)+'</b>':'')+
+    '<div class="hint">Pre-filled from the branch master — edit if another officer conducted this camp.</div>';
+  suggest(b);drawMine(b);restamp();
+};
+function suggest(b){
+  var f=$('#f_camp');
+  if(f.dataset.touched==='1'&&f.value)return;
+  f.value='Camp '+(campsOf(b.name).length+1);
+}
+$('#f_camp').oninput=function(){this.dataset.touched='1';};
+
+/* ----------------------------------------------------------- the stamp
+   Every photograph is branded before it leaves the phone: the campaign line
+   and the geo coordinates along the bottom, the NMBA mascot top-right. The
+   stamp is redrawn whenever the photo, branch or coordinates change, so what
+   is previewed is byte-for-byte what is submitted. */
+var mascot=null,mascotTried=false;
+function getMascot(){
+  return new Promise(function(res){
+    if(mascotTried)return res(mascot);
+    mascotTried=true;
+    var i=new Image();
+    i.onload=function(){mascot=i;res(mascot);};
+    i.onerror=function(){mascot=null;res(null);};
+    i.src='assets/mascot.png';
+  });
+}
+function roundRect(x,a,b,w,h,r){
+  x.beginPath();
+  x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);
+  x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();
+}
+function drawMascot(x,W,pad,size){
+  var mx=W-pad-size,my=pad;
+  x.save();
+  x.shadowColor='rgba(0,0,0,.35)';x.shadowBlur=size*.09;
+  x.fillStyle='rgba(255,255,255,.94)';
+  roundRect(x,mx,my,size,size,size*.16);x.fill();
+  x.shadowBlur=0;
+  if(mascot){
+    var p=size*.07;
+    x.drawImage(mascot,mx+p,my+p,size-p*2,size-p*2);
+  }else{
+    /* No assets/mascot.png yet — draw an NMBA helpline badge instead. */
+    x.fillStyle='#254aa0';
+    x.font='800 '+Math.round(size*.2)+'px Segoe UI,Arial,sans-serif';
+    x.textAlign='center';x.textBaseline='middle';
+    x.fillText('NMBA',mx+size/2,my+size*.36);
+    x.fillStyle='#f28c28';
+    x.font='800 '+Math.round(size*.24)+'px Segoe UI,Arial,sans-serif';
+    x.fillText('14446',mx+size/2,my+size*.62);
+    x.fillStyle='#1a8a3c';
+    x.font='600 '+Math.round(size*.1)+'px Segoe UI,Arial,sans-serif';
+    x.fillText('SAY NO TO DRUGS',mx+size/2,my+size*.84);
+  }
+  x.restore();
+}
+function makeStamped(src){
+  return Promise.all([getMascot(),new Promise(function(res,rej){
+    var i=new Image();i.onload=function(){res(i);};i.onerror=rej;i.src=src;})])
+  .then(function(r){
+    var img=r[1],W=img.width,H=img.height;
+    var c=document.createElement('canvas');c.width=W;c.height=H;
+    var x=c.getContext('2d');
+    x.drawImage(img,0,0);
+
+    var lat=$('#f_lat').value.trim(),lng=$('#f_lng').value.trim();
+    var br=byName($('#f_unit').value);
+    var d=$('#f_date').value||'2026-08-18';
+    var lines=[STAMP_LINE];
+    if(br)lines.push(br.name+' (Code '+br.code+')');
+    lines.push(lat&&lng?('Lat '+lat+'  Long '+lng+'   |   '+d)
+                       :('Location not captured   |   '+d));
+
+    var pad=Math.round(W*.025);
+    var fs=Math.max(12,Math.round(W*.030));
+    var lh=Math.round(fs*1.42);
+    var strip=lh*lines.length+pad*1.6;
+    var g=x.createLinearGradient(0,H-strip-pad,0,H);
+    g.addColorStop(0,'rgba(12,20,40,0)');g.addColorStop(.30,'rgba(12,20,40,.78)');
+    g.addColorStop(1,'rgba(12,20,40,.88)');
+    x.fillStyle=g;x.fillRect(0,H-strip-pad,W,strip+pad);
+
+    var bh=Math.max(3,Math.round(H*.006));
+    x.fillStyle='#f28c28';x.fillRect(0,H-strip-bh,W/3,bh);
+    x.fillStyle='#ffffff';x.fillRect(W/3,H-strip-bh,W/3,bh);
+    x.fillStyle='#1a8a3c';x.fillRect(2*W/3,H-strip-bh,W/3,bh);
+
+    x.textAlign='left';x.textBaseline='alphabetic';
+    x.shadowColor='rgba(0,0,0,.6)';x.shadowBlur=Math.round(fs*.35);
+    var y=H-strip+lh;
+    lines.forEach(function(t,i){
+      x.fillStyle=i===0?'#ffd88a':'#ffffff';
+      x.font=(i===0?'800 ':(i===1?'700 ':'500 '))+
+        Math.round(i===0?fs:fs*.86)+'px Segoe UI,Arial,sans-serif';
+      x.fillText(t,pad,y);y+=lh;
+    });
+    x.shadowBlur=0;
+
+    drawMascot(x,W,pad,Math.round(Math.min(W,H)*.19));
+    return c.toDataURL('image/jpeg',.8);
+  });
+}
+function restamp(){
+  if(!rawPhoto)return Promise.resolve('');
+  return makeStamped(rawPhoto).then(function(d){
+    photoData=d;$('#shotImg').src=d;$('#shot').classList.add('on');return d;
+  }).catch(function(){photoData=rawPhoto;return rawPhoto;});
+}
+
+$('#f_photo').onchange=function(){
+  var f=this.files[0];
+  if(!f){rawPhoto='';photoData='';$('#pickWrap').classList.remove('has');
+    $('#shot').classList.remove('on');return;}
+  $('#pickBox').innerHTML='Processing…';
+  shrink(f).then(function(d){
+    if(!d){$('#pickBox').innerHTML='Could not read that image<small>Try another photo</small>';return;}
+    rawPhoto=d;
+    $('#pickWrap').classList.add('has');
+    $('#pickBox').innerHTML='Photo attached &amp; stamped<small>Tap to change</small>';
+    return restamp();
+  });
+};
+function shrink(file){
+  return new Promise(function(res){
+    var r=new FileReader();
+    r.onload=function(){
+      var img=new Image();
+      img.onload=function(){
+        var c=document.createElement('canvas'),s=Math.min(1,1400/Math.max(img.width,img.height));
+        c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        res(c.toDataURL('image/jpeg',.85));
+      };
+      img.onerror=function(){res('');};img.src=r.result;
+    };
+    r.onerror=function(){res('');};r.readAsDataURL(file);
+  });
+}
+
+$('#geoBtn').onclick=function(){
+  if(!navigator.geolocation){alert('This device does not support location.');return;}
+  var b=$('#geoBtn');b.textContent='Locating…';b.disabled=true;
+  navigator.geolocation.getCurrentPosition(function(p){
+    $('#f_lat').value=p.coords.latitude.toFixed(6);
+    $('#f_lng').value=p.coords.longitude.toFixed(6);
+    b.textContent='Location Captured ✓';b.disabled=false;
+    restamp();
+  },function(){b.textContent='Capture Location';b.disabled=false;
+    alert('Location unavailable — allow location access, or type the coordinates in.');
+  },{enableHighAccuracy:true,timeout:15000});
+};
+$('#f_lat').onchange=$('#f_lng').onchange=$('#f_date').onchange=function(){restamp();};
+
+/* -------------------------------------------------------------- submit */
+function say(cls,t){var m=$('#subMsg');m.className='msg on '+cls;m.textContent=t;
+  m.scrollIntoView({block:'nearest',behavior:'smooth'});}
+
+function submit(){
+  if(!API_URL){say('err','Not connected to the tracker server yet.');return;}
+  var b=byName($('#f_unit').value);
+  if(!b){say('err','Select your branch first.');return;}
+  if(b.pinReq!==false&&!$('#f_pin').value.trim()){say('err','Enter the PIN issued for your branch.');return;}
+  if(!$('#f_camp').value.trim()){say('err','Give this camp a name, e.g. Camp 1.');return;}
+  var total=n($('#f_total').value),women=n($('#f_women').value),youth=n($('#f_youth').value);
+  if(total<1){say('err','Total pledges must be at least 1.');return;}
+  if(women>total){say('err','Women cannot be more than the total.');return;}
+  if(youth>total){say('err','Youth cannot be more than the total.');return;}
+
+  /* The branch code comes from the master list, not retyped by the officer. */
+  var p={unit:b.name,code:String(b.code).toUpperCase(),pin:$('#f_pin').value.trim(),
+    camp:$('#f_camp').value.trim(),venue:$('#f_venue').value.trim(),date:$('#f_date').value,
+    by:$('#f_by').value.trim(),desig:$('#f_desig').value.trim(),phone:$('#f_phone').value.trim(),
+    total:total,women:women,youth:youth,cert:n($('#f_cert').value),
+    lat:$('#f_lat').value.trim(),lng:$('#f_lng').value.trim(),
+    rem:$('#f_rem').value.trim(),photo:photoData};
+
+  $('#subBtn').disabled=$('#nextBtn').disabled=true;
+  $('#subBtn').textContent='Submitting…';
+  say('wait','Sending to the Regional Office…');
+
+  apiPost(p).then(function(r){
+    if(!r.ok)throw new Error(r.error||'Submission rejected.');
+    say('ok',r.message+' Camp total '+fmt(r.total)+'. Branch now '+fmt(r.branchTotal)+
+      ' pledges across '+r.camps+' camp'+(r.camps===1?'':'s')+'.'+
+      (r.revised?' Replaced the earlier figures for this camp.':''));
+    clearCamp();
+    return load(true);
+  }).catch(function(e){
+    say('err',e.message+' — not saved. Check and try again.');
+  }).then(function(){
+    $('#subBtn').disabled=$('#nextBtn').disabled=false;
+    $('#subBtn').textContent='Submit Camp';
+  });
+}
+$('#subBtn').onclick=submit;
+$('#nextBtn').onclick=submit;
+
+/* Branch, PIN and organiser stay — only the camp's own fields clear, so an
+   officer entering several camps never retypes their details. */
+function clearCamp(){
+  ['f_camp','f_venue','f_total','f_lat','f_lng','f_rem'].forEach(function(i){$('#'+i).value='';});
+  ['f_women','f_youth','f_cert'].forEach(function(i){$('#'+i).value='0';});
+  $('#f_photo').value='';rawPhoto='';photoData='';
+  $('#pickWrap').classList.remove('has');
+  $('#pickBox').innerHTML='Take or Choose Photo'+
+    '<small>Capture the location first so it is stamped on the image</small>';
+  $('#shot').classList.remove('on');
+  $('#geoBtn').textContent='Capture Location';
+  $('#f_camp').dataset.touched='';
+  var b=byName($('#f_unit').value); if(b)suggest(b);
+}
+
+/* --------------------------------------------------------------- draw */
+function draw(){
+  var bs=DATA.branches,cs=DATA.camps;
+
+  var opts='<option value="">— select your branch —</option>'+bs.map(function(b){
+    return '<option value="'+esc(b.name)+'">'+esc(b.code)+' — '+esc(b.name)+'</option>';}).join('');
+  var cur=$('#f_unit').value; $('#f_unit').innerHTML=opts; if(cur)$('#f_unit').value=cur;
+  var rc=$('#r_scope').value;
+  $('#r_scope').innerHTML='<option value="__ALL__">Consolidated — all branches</option>'+
+    bs.map(function(b){return '<option value="'+esc(b.name)+'">'+esc(b.name)+'</option>';}).join('');
+  if(rc)$('#r_scope').value=rc;
+
+  var T=agg(cs);
+  $('#k1').textContent=fmt(T.total);$('#k2').textContent=fmt(T.women);
+  $('#k3').textContent=fmt(T.youth);$('#k4').textContent=fmt(T.cert);
+  $('#k5').textContent=fmt(cs.length);
+  $('#k6').textContent=bs.filter(function(b){return campsOf(b.name).length;}).length+'/'+bs.length;
+
+  drawBranches();
+
+  var types=bs.map(function(b){return b.type;}).filter(function(v,i,a){return a.indexOf(v)===i;});
+  $('#catList').innerHTML=types.length?types.map(function(t){
+    var nms=bs.filter(function(b){return b.type===t;}).map(function(b){return b.name;});
+    var l=cs.filter(function(c){return nms.indexOf(c.unit)>=0;}),a=agg(l);
+    return '<div class="row"><div class="gr1"><div class="nm">'+esc(t)+'</div>'+
+      '<div class="sub">'+nms.length+' branches &middot; '+l.length+' camps &middot; '+
+      fmt(a.women)+' women &middot; '+fmt(a.cert)+' certs</div></div>'+
+      '<div class="val"><b>'+fmt(a.total)+'</b><span>pledges</span></div></div>';
+  }).join(''):'<div class="empty">No data yet.</div>';
+
+  $('#chkList').innerHTML=CHECKS.map(function(c,i){
+    return '<label class="chk"><input type="checkbox" data-i="'+i+'"'+(checks[i]?' checked':'')+
+      '><span>'+c+'</span></label>';}).join('');
+  $$('#chkList input').forEach(function(el){
+    el.onchange=function(){checks[this.dataset.i]=this.checked;
+      STORE.setItem('nmba_chk',JSON.stringify(checks));};});
+
+  var mb=byName($('#f_unit').value); if(mb)drawMine(mb);
+  drawReport();
+}
+
+function drawBranches(){
+  var q=($('#q').value||'').toLowerCase();
+  var bs=DATA.branches.filter(function(b){
+    return !q||b.name.toLowerCase().indexOf(q)>=0||String(b.code).indexOf(q)>=0||
+      (b.block||'').toLowerCase().indexOf(q)>=0;});
+  $('#branchList').innerHTML=bs.length?bs.map(function(b){
+    var l=campsOf(b.name),a=agg(l);
+    var pct=b.target?Math.min(100,Math.round(a.total/b.target*100)):(a.total?100:0);
+    var tag=!l.length?'<span class="tag t-no">Not reported</span>'
+      :(a.total>=b.target&&a.photos?'<span class="tag t-ok">Complete</span>'
+                                   :'<span class="tag t-part">Partial</span>');
+    var i=DATA.branches.indexOf(b);
+    return '<div class="row" style="display:block">'+
+      '<div style="display:flex;align-items:center;gap:11px" onclick="toggle('+i+')">'+
+        '<span class="chev'+(open[i]?' open':'')+'" id="ch'+i+'">&#9654;</span>'+
+        '<div class="gr1"><div class="nm">'+esc(b.name)+'</div>'+
+          '<div class="sub">'+tag+' &middot; '+esc(b.code)+' &middot; '+(l.length||'no')+
+          ' camp'+(l.length===1?'':'s')+'</div>'+
+          (b.target?'<div class="bar"><i style="width:'+pct+'%"></i></div>':'')+
+        '</div>'+
+        '<div class="val"><b>'+fmt(a.total)+'</b><span>'+(b.target?'of '+fmt(b.target):'pledges')+'</span></div>'+
+      '</div>'+
+      '<div class="camps'+(open[i]?' on':'')+'" id="cp'+i+'">'+
+        (l.length?l.map(function(c){
+          return '<div class="c">'+(c.photo?'<img class="thumb" style="width:38px;height:38px" src="'+
+            esc(c.photo)+'" alt="" onclick="pop(this.src)">':'')+
+            '<span class="cn"><b style="color:var(--ink)">'+esc(c.camp)+'</b>'+
+            (c.venue?' · '+esc(c.venue):'')+'<br>'+esc(c.date)+
+            (c.lat?' · geo-tagged':'')+'</span><b>'+fmt(c.total)+'</b></div>';
+        }).join(''):'<div class="hint">No camps submitted yet.</div>')+
+      '</div></div>';
+  }).join(''):'<div class="empty">No branch matches “'+esc(q)+'”.</div>';
+}
+$('#q').oninput=drawBranches;
+function toggle(i){open[i]=!open[i];
+  var c=$('#cp'+i),h=$('#ch'+i);
+  if(c)c.classList.toggle('on',!!open[i]);
+  if(h)h.classList.toggle('open',!!open[i]);}
+function pop(src){var w=window.open(src,'_blank');if(!w)alert('Allow pop-ups to view the photo.');}
+
+function drawMine(b){
+  var l=campsOf(b.name);
+  $('#myPanel').style.display=l.length?'':'none';
+  if(!l.length)return;
+  var a=agg(l);
+  $('#myName').textContent=b.name;
+  $('#myList').innerHTML=l.map(function(c){
+    return '<div class="row">'+
+      (c.photo?'<img class="thumb" src="'+esc(c.photo)+'" alt="" onclick="pop(this.src)">':'')+
+      '<div class="gr1"><div class="nm">'+esc(c.camp)+'</div>'+
+      '<div class="sub">'+(c.venue?esc(c.venue)+' &middot; ':'')+esc(c.date)+
+      ' &middot; '+fmt(c.women)+'W / '+fmt(c.youth)+'Y / '+fmt(c.cert)+'C'+
+      (c.rev?' &middot; revised '+c.rev+'×':'')+'</div></div>'+
+      '<div class="val"><b>'+fmt(c.total)+'</b><span>pledges</span></div></div>';
+  }).join('')+
+  '<div class="row" style="border-top:2px solid var(--line)">'+
+    '<div class="gr1"><div class="nm">Branch total</div>'+
+    '<div class="sub">'+l.length+' camp'+(l.length===1?'':'s')+'</div></div>'+
+    '<div class="val"><b style="color:var(--green)">'+fmt(a.total)+'</b><span>pledges</span></div></div>';
+}
+
+/* -------------------------------------------------------------- report */
+function scoped(){var s=$('#r_scope').value;
+  return (s&&s!=='__ALL__')?DATA.camps.filter(function(c){return c.unit===s;}):DATA.camps;}
+
+function drawReport(){
+  var l=scoped(),a=agg(l),s=$('#r_scope').value;
+  var org=$('#r_org').value||'Indian Overseas Bank, Regional Office, Dindigul';
+  var title=(!s||s==='__ALL__')?org+' — Consolidated (all branches)':s;
+  var pics=l.filter(function(c){return c.photo;});
+  var nb=l.map(function(c){return c.unit;}).filter(function(v,i,r){return r.indexOf(v)===i;}).length;
+  var rows=[['1.','Number of People took National Pledge Against Drug Abuse',a.total],
+            ['2.','No of Women took the pledge',a.women],
+            ['3.','No of Youth took the pledge',a.youth],
+            ['4.','No of e-certificate generated',a.cert]];
+
+  $('#repOut').innerHTML=
+    '<div class="hd"><h3>NASHA MUKT BHARAT ABHIYAAN</h3>'+
+    '<p>National Pledge Against Drug Abuse — 18<sup>th</sup> August 2026<br>'+
+    'Department of Social Justice &amp; Empowerment, Government of India</p>'+
+    '<div class="who">'+esc(title)+'</div></div>'+
+    '<table class="rt"><thead><tr><th style="width:52px">Sr. No</th><th>Particulars</th>'+
+    '<th style="width:88px">Numbers</th></tr></thead><tbody>'+
+    rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+esc(r[1])+
+      '</td><td class="n">'+fmt(r[2])+'</td></tr>';}).join('')+
+    '<tr><td>5.</td><td>Geo Tagged Photo with name of Organisation'+
+    (pics.length?'<div class="pics">'+pics.map(function(p){
+      return '<figure><img src="'+esc(p.photo)+'" alt="" onclick="pop(this.src)">'+
+        '<figcaption><b>'+esc(p.unit)+'</b><br>'+esc(p.camp)+'<br>'+esc(p.date)+
+        (p.lat?'<br>'+esc(p.lat)+', '+esc(p.lng):'')+'</figcaption></figure>';}).join('')+'</div>'
+     :'<div class="hint">No geo-tagged photograph received.</div>')+
+    '</td><td class="n">'+pics.length+'</td></tr></tbody></table>'+
+    '<p class="hint">Branches covered: '+nb+' &middot; Camps conducted: '+l.length+
+    ' &middot; Helpline 14446 &middot; nashamukt.dosje.gov.in/epledge</p>';
+}
+$('#r_scope').onchange=drawReport;
+$('#r_org').oninput=drawReport;
+$('#printBtn').onclick=function(){window.print();};
+$('#refreshBtn').onclick=function(e){e.stopPropagation();load();};
+
+$('#csvBtn').onclick=function(){
+  var h=['Branch','Code','Type','Block','Camp','Venue','Date','Total','Women','Youth','eCerts',
+         'Latitude','Longitude','ConductedBy','Designation','Remarks','PhotoURL'];
+  var q=function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';};
+  var l=scoped();
+  var lines=l.map(function(c){var b=byName(c.unit)||{};
+    return [c.unit,b.code||'',b.type||'',b.block||'',c.camp,c.venue,c.date,c.total,c.women,c.youth,
+            c.cert,c.lat,c.lng,c.by,c.desig,c.rem,c.photo].map(q).join(',');});
+  var a=agg(l);
+  lines.push(['TOTAL','','','','','','',a.total,a.women,a.youth,a.cert,'','','','','',''].map(q).join(','));
+  var u=URL.createObjectURL(new Blob(['﻿'+h.join(',')+'\n'+lines.join('\n')],{type:'text/csv'}));
+  var link=document.createElement('a');link.href=u;
+  link.download='NMBA_Pledge_18Aug2026.csv';link.click();
+  setTimeout(function(){URL.revokeObjectURL(u);},1000);
+};
+
+draw();
+load();
+setInterval(function(){load(true);},60000);
+</script>
+</body>
+</html>

@@ -63,7 +63,11 @@ For the real mascot, download it from the IEC folder and save it as **`assets/ma
 (a square PNG with transparency works best). Until that file exists the corner shows an
 `NMBA 14446 — SAY NO TO DRUGS` badge instead, so nothing breaks if you skip this.
 
-Tell officers to press **Capture Location before the photo** — the coordinates are drawn onto
+**Both the photograph and the coordinates are mandatory.** A camp cannot be filed without
+a geo-tagged photo — the DoSJE format asks for one at Sr. No 5, and a figure without evidence
+is of no use at the district. The form refuses to send while the image is still being
+prepared, so tell officers to **wait for the stamped preview to appear** before pressing
+Submit. Capture the location first; the coordinates are drawn onto the image.
 the image. If they capture the location afterwards, the stamp redraws itself automatically, so
 either order works, but the prompt on the button says to do it first.
 

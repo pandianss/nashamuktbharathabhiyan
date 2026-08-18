@@ -343,7 +343,9 @@ textarea{min-height:64px;resize:vertical}
   </div>
 
   <div class="card">
-    <h2>Geo-tagged Photo</h2>
+    <h2>Geo-tagged Photo <span class="req" style="color:var(--bad)">*</span></h2>
+    <p class="hint" style="margin:-6px 0 11px">Required. Capture the location first, then the
+      photograph — the coordinates are stamped onto the image.</p>
     <button type="button" class="btn gh" id="geoBtn" style="margin-top:0">Capture Location</button>
     <div class="two" style="margin-top:10px">
       <div class="f"><label>Latitude</label><input id="f_lat" inputmode="decimal" placeholder="10.3673"></div>
@@ -352,7 +354,7 @@ textarea{min-height:64px;resize:vertical}
     <label class="pick" id="pickWrap">
       <input type="file" id="f_photo" accept="image/*">
       <span class="box" id="pickBox">Take or Choose Photo
-        <small>Capture the location first so it is stamped on the image</small></span>
+        <small>Required — wait for the stamped preview before submitting</small></span>
     </label>
     <div class="shot" id="shot">
       <img id="shotImg" alt="Photograph with the campaign stamp">
@@ -875,10 +877,17 @@ function submit(){
      that window used to send an empty photo without saying so. */
   if(stamping){say('wait','The photograph is still being prepared — try again in a moment.');return;}
   if(rawPhoto&&!photoData){say('err','The photograph could not be prepared. Re-attach it and try again.');return;}
+  /* The DoSJE format asks for a geo-tagged photograph (Sr. No 5), so a camp
+     cannot be filed without one. */
   if(!photoData){
-    if(!confirm('No photograph is attached.\n\nThe DoSJE report requires a geo-tagged photo '+
-      '(Sr. No 5). You can submit now and re-send this same camp later with the photo — '+
-      'it will update the entry rather than duplicate it.\n\nSubmit without a photograph?'))return;
+    say('err','A geo-tagged photograph is required. Tap "Take or Choose Photo" and wait for the preview.');
+    $('#pickWrap').scrollIntoView({block:'center',behavior:'smooth'});
+    return;
+  }
+  if(!$('#f_lat').value.trim()||!$('#f_lng').value.trim()){
+    say('err','Capture the location — the coordinates must be stamped on the photograph.');
+    $('#geoBtn').scrollIntoView({block:'center',behavior:'smooth'});
+    return;
   }
 
   /* The branch code comes from the master list, not retyped by the officer. */
@@ -918,7 +927,7 @@ function clearCamp(){
   $('#f_photo').value='';rawPhoto='';photoData='';
   $('#pickWrap').classList.remove('has');
   $('#pickBox').innerHTML='Take or Choose Photo'+
-    '<small>Capture the location first so it is stamped on the image</small>';
+    '<small>Required — wait for the stamped preview before submitting</small>';
   $('#shot').classList.remove('on');
   $('#geoBtn').textContent='Capture Location';
   $('#f_camp').dataset.touched='';

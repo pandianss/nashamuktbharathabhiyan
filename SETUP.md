@@ -67,9 +67,8 @@ For the real mascot, download it from the IEC folder and save it as **`assets/ma
 a geo-tagged photo — the DoSJE format asks for one at Sr. No 5, and a figure without evidence
 is of no use at the district. The form refuses to send while the image is still being
 prepared, so tell officers to **wait for the stamped preview to appear** before pressing
-Submit. Capture the location first; the coordinates are drawn onto the image.
-the image. If they capture the location afterwards, the stamp redraws itself automatically, so
-either order works, but the prompt on the button says to do it first.
+Submit. Capture the location first; the coordinates are drawn onto the image. If the location
+is captured afterwards the stamp redraws itself automatically, so either order works.
 
 **5. Deploy as a web app.** Back in Apps Script: **Deploy → New deployment** →
 gear icon → **Web app**. Set:

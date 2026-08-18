@@ -164,3 +164,38 @@ data as a spreadsheet if the district wants the working.
   running the old code. The URL stays the same.
 - **Who can edit the data.** Only people you share the Google Sheet with. Branches can add
   camps through the form but can never edit or delete anything.
+
+---
+
+## Automatic notifications
+
+Two layers, so the Regional Office knows who has reported without watching a screen.
+
+**Instant email on every submission.** The moment a branch files a camp, an email arrives:
+which branch, which camp, how many pledges, that branch's running total and camp count, and
+the region-wide position with the number of branches still outstanding.
+
+**Rolling status digest.** A full table — every branch that has reported with its camp count,
+pledges, women, youth, e-certificates and photographs, then the list of branches yet to
+report. Send it on demand with **NMBA → Email me the status now**, or schedule it with
+**NMBA → Start hourly status emails**. Turn it off after the 18th with **Stop hourly status
+emails**.
+
+**Live alerts in the dashboard.** With the Dashboard tab open it polls every minute and pops a
+toast naming the branch and camp as figures land. Press **Enable desktop alerts** once and
+they also arrive as system notifications, so they show even when the browser is behind another
+window. New camps and revised figures are announced separately.
+
+### Turning it on
+
+1. Emails go to the account that owns the spreadsheet. To send elsewhere, set
+   `NOTIFY_EMAIL` at the top of `Code.gs` (comma-separate several addresses).
+2. **Redeploy the script, or none of this runs**: Apps Script → **Deploy → Manage
+   deployments → pencil → Version: New version → Deploy**. The URL does not change.
+3. Run **NMBA → Email me the status now** once. Google will ask for permission to send mail
+   as you — approve it. Nothing is sent until you do.
+
+> Gmail allows roughly 100 emails a day on a consumer account (about 1,500 on Workspace).
+> With 61 branches that is ample. If you expect several hundred camps, set
+> `NOTIFY_ON_SUBMIT = false` in `Code.gs` and rely on the hourly digest instead — a mail
+> failure is caught and logged, so it can never block a branch's submission.

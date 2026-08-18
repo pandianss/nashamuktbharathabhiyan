@@ -188,6 +188,19 @@ textarea{min-height:64px;resize:vertical}
 .chk:last-child{border-bottom:0}
 .chk input{width:21px;height:21px;flex:none;margin:1px 0 0;accent-color:var(--green)}
 
+/* ------------------------------------------------------------- toasts */
+.toasts{position:fixed;left:10px;right:10px;bottom:calc(72px + env(safe-area-inset-bottom));
+  z-index:60;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--iob-dk);color:#fff;border-radius:12px;padding:11px 13px;
+  box-shadow:0 6px 20px rgba(12,20,40,.32);font-size:13px;line-height:1.4;
+  border-left:4px solid var(--gold);animation:pop .25s ease-out;pointer-events:auto}
+.toast b{display:block;font-size:13.5px;margin-bottom:1px}
+.toast span{opacity:.85;font-size:11.5px}
+@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media screen and (min-width:760px){
+  .toasts{left:auto;right:18px;bottom:18px;width:330px}
+}
+
 /* ----------------------------------------------------------- tab bar */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;background:#fff;
   border-top:1px solid var(--line);box-shadow:var(--sh-up);
@@ -349,6 +362,9 @@ textarea{min-height:64px;resize:vertical}
       <span class="r" id="sync">syncing…<br>
         <button class="btn gh sm noprint" id="refreshBtn" style="margin-top:4px">Refresh</button></span>
     </h2>
+    <div class="btnrow noprint" style="margin-bottom:11px">
+      <button class="btn gh sm" id="alertBtn">Enable desktop alerts</button>
+    </div>
     <div class="f noprint"><input id="q" placeholder="Search branch…" autocomplete="off"></div>
     <div id="branchList"></div>
   </div>
@@ -413,6 +429,8 @@ textarea{min-height:64px;resize:vertical}
 </section>
 
 </main>
+
+<div class="toasts" id="toasts"></div>
 
 <script>
 /* ====================================================================
@@ -499,6 +517,60 @@ function apiPost(p){
    .then(function(r){return r.text();})
    .then(function(t){try{return JSON.parse(t);}catch(e){throw new Error('Unexpected server reply.');}});
 }
+/* --------------------------------------------------------- live alerts
+   Each poll is compared with the previous one, so the Regional Office sees a
+   toast (and a system notification, if permitted) the moment a branch files a
+   camp — without having to watch the table. */
+var seenCamps=null;
+function campKey(c){return c.unit+'|'+c.date+'|'+String(c.camp).toLowerCase();}
+
+function toast(title,sub){
+  var t=document.createElement('div');
+  t.className='toast';
+  t.innerHTML='<b>'+esc(title)+'</b><span>'+esc(sub)+'</span>';
+  $('#toasts').appendChild(t);
+  setTimeout(function(){
+    t.style.transition='opacity .4s';t.style.opacity='0';
+    setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},450);
+  },9000);
+  if(window.Notification&&Notification.permission==='granted'){
+    try{new Notification(title,{body:sub,tag:title});}catch(e){}
+  }
+}
+
+function detectNew(camps){
+  var now={};
+  camps.forEach(function(c){now[campKey(c)]=c;});
+  if(seenCamps===null){seenCamps=now;return;}   /* first load: no alerts */
+  var fresh=[],revised=[];
+  Object.keys(now).forEach(function(k){
+    if(!seenCamps[k])fresh.push(now[k]);
+    else if(n(seenCamps[k].total)!==n(now[k].total))revised.push(now[k]);
+  });
+  seenCamps=now;
+
+  fresh.slice(0,4).forEach(function(c){
+    var mine=campsOf(c.unit);
+    toast(c.unit+' — '+c.camp,
+      fmt(c.total)+' pledges  ·  branch now '+fmt(agg(mine).total)+
+      ' across '+mine.length+' camp'+(mine.length===1?'':'s'));
+  });
+  if(fresh.length>4)toast('+'+(fresh.length-4)+' more camps received','Scroll the branch list for details.');
+  revised.slice(0,3).forEach(function(c){
+    toast('Revised: '+c.unit+' — '+c.camp,'Figures updated to '+fmt(c.total)+' pledges.');
+  });
+}
+
+$('#alertBtn').onclick=function(){
+  var b=$('#alertBtn');
+  if(!window.Notification){b.textContent='Alerts not supported here';return;}
+  if(Notification.permission==='granted'){b.textContent='Desktop alerts are on';return;}
+  Notification.requestPermission().then(function(p){
+    b.textContent=p==='granted'?'Desktop alerts are on':'Alerts blocked in browser settings';
+    if(p==='granted')toast('Alerts enabled','You will be notified as branches report.');
+  });
+};
+
 function load(quiet){
   if(!API_URL){note('err','Not connected — paste the Apps Script URL into index.html (see SETUP.md). '+
     'The branch list below is the built-in copy; figures cannot be submitted yet.');
@@ -508,6 +580,7 @@ function load(quiet){
     if(!d||!d.ok)throw new Error((d&&d.error)||'Server error');
     if(d.branches&&d.branches.length)DATA.branches=d.branches;
     DATA.camps=d.camps||[];note('','');
+    detectNew(DATA.camps);
     $('#sync').firstChild.nodeValue=new Date().toLocaleTimeString('en-IN',
       {hour:'2-digit',minute:'2-digit'});
     draw();

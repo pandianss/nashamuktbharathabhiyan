@@ -18,6 +18,12 @@ var CAMP_SHEET   = 'Camps';
 var PHOTO_FOLDER = 'NMBA Pledge Photos 2026';
 var PLEDGE_DATE  = '2026-08-18';
 
+/* Who receives the alerts. Leave blank to use the account that owns this
+ * spreadsheet; put one or more addresses (comma separated) to send elsewhere. */
+var NOTIFY_EMAIL = '';
+/* Email the Regional Office the moment a branch submits a camp. */
+var NOTIFY_ON_SUBMIT = true;
+
 var BRANCH_COLS = ['Code', 'PIN', 'Name', 'Type', 'Block', 'Organiser', 'Designation',
                    'Contact', 'Email', 'Target'];
 
@@ -33,6 +39,10 @@ function onOpen() {
     .createMenu('NMBA')
     .addItem('Set up sheets', 'setupSheets')
     .addItem('Load Dindigul branch master (57 branches)', 'loadBranchMaster')
+    .addSeparator()
+    .addItem('Email me the status now', 'sendDigest')
+    .addItem('Start hourly status emails', 'startHourlyDigest')
+    .addItem('Stop hourly status emails', 'stopHourlyDigest')
     .addToUi();
 }
 
@@ -330,7 +340,7 @@ function submit_(b) {
     if (c.unit === branchName) { branchTotal += c.total; campCount++; }
   });
 
-  return {
+  var result = {
     ok: true,
     revised: !!existing,
     branch: branchName,
@@ -342,6 +352,13 @@ function submit_(b) {
       ? 'Figures for "' + camp + '" have been revised.'
       : '"' + camp + '" recorded for ' + branchName + '.'
   };
+
+  // The camp is already saved; a mail problem must never fail the submission.
+  try { alertSubmission_(branchName, camp, result); } catch (err) {
+    console.error('Alert failed: ' + err);
+  }
+
+  return result;
 }
 
 function num_(v) {
@@ -377,6 +394,172 @@ function folder_() {
   var f = it.hasNext() ? it.next() : DriveApp.createFolder(PHOTO_FOLDER);
   props.setProperty('PHOTO_FOLDER_ID', f.getId());
   return f;
+}
+
+/* ---------------------------------------------------------- notifications
+ * Two kinds: an instant alert each time a branch submits a camp, and a
+ * rolling status digest naming who has reported, how many camps each has
+ * held, and who is still outstanding.
+ *
+ * Gmail caps a consumer account at ~100 emails a day (Workspace ~1500). With
+ * 61 branches that is comfortable, but if you expect several hundred camps,
+ * set NOTIFY_ON_SUBMIT to false and rely on the hourly digest alone. */
+
+function recipients_() {
+  var to = String(NOTIFY_EMAIL || '').trim();
+  if (to) return to;
+  try { return Session.getEffectiveUser().getEmail(); } catch (e) { return ''; }
+}
+
+function mail_(subject, plain, html) {
+  var to = recipients_();
+  if (!to) return;
+  try {
+    MailApp.sendEmail({ to: to, subject: subject, body: plain, htmlBody: html,
+                        name: 'NMBA Pledge Tracker' });
+  } catch (err) {
+    // Never let a mail failure (quota, no permission) break a submission.
+    console.error('Notification failed: ' + err);
+  }
+}
+
+/** Snapshot of the whole region, used by both alert types. */
+function status_() {
+  var bs = branches_(), cs = camps_();
+  var byBranch = {};
+  cs.forEach(function (c) {
+    var b = byBranch[c.unit] || (byBranch[c.unit] = { camps: 0, total: 0, women: 0,
+                                                      youth: 0, cert: 0, photos: 0 });
+    b.camps++; b.total += c.total; b.women += c.women; b.youth += c.youth;
+    b.cert += c.cert; if (c.photo) b.photos++;
+  });
+  var reported = [], pending = [], tot = { total: 0, women: 0, youth: 0, cert: 0, photos: 0 };
+  bs.forEach(function (b) {
+    var s = byBranch[b.name];
+    if (s) {
+      reported.push({ name: b.name, code: b.code, camps: s.camps, total: s.total,
+                      women: s.women, youth: s.youth, cert: s.cert, photos: s.photos,
+                      target: b.target });
+      tot.total += s.total; tot.women += s.women; tot.youth += s.youth;
+      tot.cert += s.cert; tot.photos += s.photos;
+    } else {
+      pending.push({ name: b.name, code: b.code });
+    }
+  });
+  reported.sort(function (a, b) { return b.total - a.total; });
+  return { branches: bs.length, camps: cs.length, reported: reported,
+           pending: pending, totals: tot };
+}
+
+function alertSubmission_(branchName, camp, rec) {
+  if (!NOTIFY_ON_SUBMIT) return;
+  var s = status_();
+  var head = (rec.revised ? 'Revised: ' : '') + branchName + ' — ' + camp +
+             ' (' + rec.total + ' pledges)';
+  var plain = head + '\n\n' +
+    branchName + ' now stands at ' + rec.branchTotal + ' pledges across ' +
+    rec.camps + ' camp(s).\n\n' +
+    'REGION: ' + s.totals.total + ' pledges, ' + s.camps + ' camps, ' +
+    s.reported.length + ' of ' + s.branches + ' branches reported.\n' +
+    'Still to report: ' + (s.pending.length ? s.pending.length + ' branches' : 'none') + '.';
+  var html =
+    '<div style="font:14px/1.5 Segoe UI,Arial,sans-serif;color:#17203a">' +
+    '<p style="margin:0 0 6px"><b style="color:#254aa0;font-size:16px">' + esc_(head) + '</b></p>' +
+    '<p style="margin:0 0 14px">' + esc_(branchName) + ' now stands at <b>' + rec.branchTotal +
+      '</b> pledges across <b>' + rec.camps + '</b> camp(s).</p>' +
+    kpiTable_(s) +
+    '<p style="margin:14px 0 0;font-size:12px;color:#5f6b80">' +
+      s.pending.length + ' branch(es) still to report.</p></div>';
+  mail_('NMBA: ' + head, plain, html);
+}
+
+function sendDigest() {
+  var s = status_();
+  var rows = s.reported.map(function (r) {
+    return '<tr><td style="padding:6px 9px;border:1px solid #d7dde8">' + esc_(r.name) +
+      ' <span style="color:#5f6b80">(' + esc_(r.code) + ')</span></td>' +
+      '<td style="padding:6px 9px;border:1px solid #d7dde8;text-align:right">' + r.camps + '</td>' +
+      '<td style="padding:6px 9px;border:1px solid #d7dde8;text-align:right"><b>' + r.total + '</b></td>' +
+      '<td style="padding:6px 9px;border:1px solid #d7dde8;text-align:right">' + r.women + '</td>' +
+      '<td style="padding:6px 9px;border:1px solid #d7dde8;text-align:right">' + r.youth + '</td>' +
+      '<td style="padding:6px 9px;border:1px solid #d7dde8;text-align:right">' + r.cert + '</td>' +
+      '<td style="padding:6px 9px;border:1px solid #d7dde8;text-align:right">' + r.photos + '</td></tr>';
+  }).join('');
+
+  var html =
+    '<div style="font:14px/1.5 Segoe UI,Arial,sans-serif;color:#17203a">' +
+    '<h2 style="color:#254aa0;margin:0 0 4px;font-size:18px">NMBA Pledge — status</h2>' +
+    '<p style="margin:0 0 14px;color:#5f6b80;font-size:12.5px">' +
+      'Indian Overseas Bank, Regional Office, Dindigul &middot; ' + esc_(nowStamp_()) + '</p>' +
+    kpiTable_(s) +
+    '<h3 style="margin:18px 0 6px;font-size:14px;color:#18306b">Branches reported (' +
+      s.reported.length + ')</h3>' +
+    (rows ?
+      '<table style="border-collapse:collapse;font-size:13px">' +
+      '<tr style="background:#eef2fb;color:#18306b">' +
+      ['Branch','Camps','Pledges','Women','Youth','e-Certs','Photos'].map(function (h) {
+        return '<th style="padding:6px 9px;border:1px solid #d7dde8;text-align:left">' + h + '</th>';
+      }).join('') + '</tr>' + rows + '</table>'
+      : '<p style="color:#c0392b">No branch has reported yet.</p>') +
+    '<h3 style="margin:18px 0 6px;font-size:14px;color:#18306b">Yet to report (' +
+      s.pending.length + ')</h3>' +
+    '<p style="font-size:12.5px;color:#5f6b80">' +
+      (s.pending.length ? s.pending.map(function (p) {
+        return esc_(p.name) + ' (' + esc_(p.code) + ')'; }).join(' &middot; ')
+      : 'All branches have reported.') + '</p></div>';
+
+  var plain = 'NMBA Pledge status — ' + nowStamp_() + '\n\n' +
+    s.totals.total + ' pledges | ' + s.camps + ' camps | ' +
+    s.reported.length + '/' + s.branches + ' branches reported\n' +
+    'Women ' + s.totals.women + ' | Youth ' + s.totals.youth +
+    ' | e-Certs ' + s.totals.cert + ' | Photos ' + s.totals.photos + '\n\n' +
+    'REPORTED:\n' + (s.reported.map(function (r) {
+      return '  ' + r.name + ' (' + r.code + ') — ' + r.camps + ' camp(s), ' +
+             r.total + ' pledges'; }).join('\n') || '  none') + '\n\n' +
+    'YET TO REPORT:\n' + (s.pending.map(function (p) {
+      return '  ' + p.name + ' (' + p.code + ')'; }).join('\n') || '  none');
+
+  mail_('NMBA status: ' + s.totals.total + ' pledges, ' + s.reported.length +
+        '/' + s.branches + ' branches', plain, html);
+}
+
+function kpiTable_(s) {
+  var cell = function (label, value, colour) {
+    return '<td style="padding:9px 13px;border:1px solid #d7dde8;background:#f7f9fc">' +
+      '<div style="font-size:20px;font-weight:800;color:' + colour + '">' + value + '</div>' +
+      '<div style="font-size:10.5px;color:#5f6b80;text-transform:uppercase;letter-spacing:.4px">' +
+      label + '</div></td>';
+  };
+  return '<table style="border-collapse:collapse"><tr>' +
+    cell('Pledges', s.totals.total, '#18306b') +
+    cell('Camps', s.camps, '#b8600d') +
+    cell('Branches', s.reported.length + '/' + s.branches, '#12662d') +
+    cell('Women', s.totals.women, '#18306b') +
+    cell('Youth', s.totals.youth, '#18306b') +
+    cell('Photos', s.totals.photos, '#12662d') +
+    '</tr></table>';
+}
+
+function nowStamp_() {
+  return Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd MMM yyyy, HH:mm');
+}
+
+function esc_(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function startHourlyDigest() {
+  stopHourlyDigest();
+  ScriptApp.newTrigger('sendDigest').timeBased().everyHours(1).create();
+  SpreadsheetApp.getUi().alert('Hourly status emails will now go to ' + recipients_() +
+    '.\n\nUse "Stop hourly status emails" to turn them off after the 18th.');
+}
+
+function stopHourlyDigest() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'sendDigest') ScriptApp.deleteTrigger(t);
+  });
 }
 
 /* --------------------------------------------------------------- replies */

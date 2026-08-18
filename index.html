@@ -512,7 +512,7 @@ var DATA={branches:SEED.map(function(r){
   return {code:r[0],name:r[1],type:r[2],block:'',person:'',desig:'',phone:'',
           target:0,pinReq:true};}),camps:[]};
 
-var open={}, rawPhoto='', photoData='';
+var open={}, rawPhoto='', photoData='', stamping=false;
 
 var CHECKS=[
  "Pledge organised across all branches / offices / units",
@@ -801,9 +801,15 @@ function makeStamped(src){
 }
 function restamp(){
   if(!rawPhoto)return Promise.resolve('');
+  stamping=true;
   return makeStamped(rawPhoto).then(function(d){
     photoData=d;$('#shotImg').src=d;$('#shot').classList.add('on');return d;
-  }).catch(function(){photoData=rawPhoto;return rawPhoto;});
+  }).catch(function(){
+    /* Stamping failed (e.g. the mascot never loaded) — send the plain photo
+       rather than losing the evidence entirely. */
+    photoData=rawPhoto;$('#shotImg').src=rawPhoto;$('#shot').classList.add('on');
+    return rawPhoto;
+  }).then(function(d){stamping=false;return d;});
 }
 
 $('#f_photo').onchange=function(){
@@ -864,6 +870,16 @@ function submit(){
   if(total<1){say('err','Total pledges must be at least 1.');return;}
   if(women>total){say('err','Women cannot be more than the total.');return;}
   if(youth>total){say('err','Youth cannot be more than the total.');return;}
+
+  /* The photograph is compressed and stamped asynchronously. Submitting during
+     that window used to send an empty photo without saying so. */
+  if(stamping){say('wait','The photograph is still being prepared — try again in a moment.');return;}
+  if(rawPhoto&&!photoData){say('err','The photograph could not be prepared. Re-attach it and try again.');return;}
+  if(!photoData){
+    if(!confirm('No photograph is attached.\n\nThe DoSJE report requires a geo-tagged photo '+
+      '(Sr. No 5). You can submit now and re-send this same camp later with the photo — '+
+      'it will update the entry rather than duplicate it.\n\nSubmit without a photograph?'))return;
+  }
 
   /* The branch code comes from the master list, not retyped by the officer. */
   var p={unit:b.name,code:String(b.code).toUpperCase(),pin:$('#f_pin').value.trim(),

@@ -195,11 +195,11 @@ textarea{min-height:64px;resize:vertical}
   border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--iob);word-break:break-all;
   font-family:Consolas,monospace;line-height:1.35}
 .share .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.share .btns .btn{margin-top:0;font-size:14px;min-height:44px}
+.share .btns .btn{margin-top:0;font-size:14px;min-height:44px;text-decoration:none}
 .share .btns .btn.full{grid-column:1/-1}
 .wa{background:#25863f}
 @media screen and (min-width:760px){
-  .share .btns{grid-template-columns:repeat(4,auto);justify-content:start}
+  .share .btns{grid-template-columns:repeat(3,auto);justify-content:start}
   .share .btns .btn{min-width:0;padding:11px 18px}
   .share .btns .btn.full{grid-column:auto}
 }
@@ -292,10 +292,9 @@ textarea{min-height:64px;resize:vertical}
     <div class="url" id="pledgeUrl">https://nashamukt.dosje.gov.in/epledge</div>
     <div class="btns">
       <button type="button" class="btn" id="copyBtn">Copy Link</button>
-      <button type="button" class="btn wa" id="waBtn">WhatsApp</button>
-      <button type="button" class="btn gh full" id="shareBtn">Share…</button>
+      <a class="btn wa" id="waBtn" href="https://wa.me/" target="_blank" rel="noopener">WhatsApp</a>
       <a class="btn gh full" href="https://nashamukt.dosje.gov.in/epledge" target="_blank"
-         rel="noopener" style="text-decoration:none">Open Portal</a>
+         rel="noopener">Open Portal</a>
     </div>
     <p class="hint">Send this to every employee, staff member and stakeholder. Each person
       takes the pledge on the portal and downloads their own participation certificate —
@@ -675,19 +674,9 @@ $('#copyBtn').onclick=function(){
   });
 };
 
-$('#waBtn').onclick=function(){
-  window.open('https://wa.me/?text='+encodeURIComponent(PLEDGE_MSG),'_blank','noopener');
-};
-
-$('#shareBtn').onclick=function(){
-  if(navigator.share){
-    navigator.share({title:'NMBA e-Pledge',text:PLEDGE_MSG,url:PLEDGE_URL})
-      .catch(function(){});
-  }else{
-    /* Desktop browsers mostly lack the share sheet — copy instead. */
-    $('#copyBtn').click();
-  }
-};
+/* A real link, not window.open: passing a features string makes it a popup,
+   which blockers kill silently — which is exactly what happened before. */
+$('#waBtn').href='https://wa.me/?text='+encodeURIComponent(PLEDGE_MSG);
 
 /* ------------------------------------------------------------- branches */
 function byName(nm){return DATA.branches.filter(function(b){return b.name===nm;})[0]||null;}
